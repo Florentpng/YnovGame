@@ -1,37 +1,16 @@
-const express = require("express");
-const app = express();
-const pool = require("../src/db");
-
-app.use(express.json());
-
-app.get("/users", async (req, res) => {
-  let connection;
-  try {
-    connection = await pool.getConnection();
-    const users = await connection.query("SELECT * FROM users");
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ message: "Error fetching users" });
-  } finally {
-    if (connection) connection.release();
-  }
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const auth_1 = __importDefault(require("./controllers/auth"));
+const app = (0, express_1.default)();
+const PORT = 3000;
+app.get('/', (req, res) => {
+    res.send('Bienvenue sur mon serveur !');
 });
-
-app.post("/users", async (req, res) => {
-  let connection;
-  try {
-    connection = await pool.getConnection();
-    await connection.query("INSERT INTO users SET ?", req.body);
-    res.json({ message: "User added successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ message: "Error adding user" });
-  } finally {
-    if (connection) connection.release();
-  }
+app.listen(PORT, () => {
+    console.log(`Serveur demarre sur http://localhost:${PORT}`);
 });
-
-app.listen(3000, () => {
-  console.log("Server listening on port 3000");
-});
+app.use('/auth', auth_1.default);
