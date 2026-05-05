@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node src/.js",
-    "dev": "ts-node src/app.ts"
+    "start": "node src/app.js",
+    "dev": "ts-node src/app.ts",
+    "sass": "sass --watch src/scss:src/css"
   },
   "keywords": [],
   "author": "",

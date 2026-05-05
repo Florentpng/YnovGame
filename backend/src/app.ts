@@ -8,6 +8,8 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Bienvenue sur mon serveur !');
 });
 
+app.use(express.json());
+
 app.listen(PORT, () => {
     console.log(`Serveur demarre sur http://localhost:${PORT}`);
 });
