@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import pool from "../db/connection";
+import pool from "../config/db";
 
 async function initDb(): Promise<void> {
-  const sql = fs.readFileSync(path.join(__dirname, "../db/init.sql"), "utf8");
+  const sql = fs.readFileSync(path.join(__dirname, "init.sql"), "utf8");
   const statements = sql
     .split(";")
     .map((s) => s.trim())
