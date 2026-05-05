@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import authRouter from './controllers/auth';
+import usersRouter from './controllers/users';
 
 const app = express();
 const PORT = 3000;
@@ -15,3 +16,6 @@ app.listen(PORT, () => {
 });
 
 app.use('/auth', authRouter);
+app.use('/users', usersRouter);
+
+app.use(express.json());
