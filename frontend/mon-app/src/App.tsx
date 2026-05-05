@@ -1,35 +1,45 @@
 import { useState } from 'react'
 import './App.css'
 
-function Form({ title, isLoginMode }: { title: string; isLoginMode: boolean }) {
-  return <form onSubmit={isLoginMode ? login : register}>
-    <h2>{title}</h2>
-    <input type="text" name="username" placeholder="Username" required />
-    <input type="password" name="password" placeholder="Password" required />
+const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [isLoginMode, setIsLoginMode] = useState(true);
+
+const [username, setUsername] = useState('');
+const [password, setPassword] = useState('');
+
+function Form({ title }: { title: string }) {
+  return <form>
+    <h2 onSubmit={login}>{title}</h2>
+    <input onChange={(e) => setUsername(e.target.value)} type="text" name="username" placeholder="Username" required />
+    <input onChange={(e) => setPassword(e.target.value)} type="password" name="password" placeholder="Password" required />
     <button type="submit">Valider</button>
   </form>
 }
 
-function login() {
-  
-}
+async function login() {
+  const response = await fetch('http://localhost:3000/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
 
-function register() {
-
+  if (response.status === 200) {
+    setIsLoggedIn(true);
+    
+  } else {
+    alert('Mauvais identifiant ou mot de passe.');
+  }
 }
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoginMode, setIsLoginMode] = useState(true);
-
   return (
     <>
       {!isLoggedIn ?
         <section id="login-section" >
-          {isLoginMode ? <Form title="Login" isLoginMode={true} /> : <Form title="Register" isLoginMode={false} />}
-        </section> : 
+          {isLoginMode ? <Form title="Login" /> : <Form title="Register" />}
+        </section> :
         <section id="game-section">
-          
+
         </section>}
     </>
   )
