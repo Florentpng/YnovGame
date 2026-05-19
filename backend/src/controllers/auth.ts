@@ -36,7 +36,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
             return;
         }
 
-        res.json({ username, password });
+        res.json({ username });
     } catch (err) {
         console.error(err);
         res.status(500).send({ message: "Error login route" });
