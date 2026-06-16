@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+const cors = require('cors');
 import authRouter from './controllers/auth';
 import usersRouter from './controllers/users';
 import { initDb } from './config/init';
@@ -6,6 +7,7 @@ import { initDb } from './config/init';
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
