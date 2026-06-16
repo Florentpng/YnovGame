@@ -1,0 +1,466 @@
+import { Scene } from 'phaser';
+import { EventBus } from '../EventBus';
+import { GameState, type PokemonInstance } from '../state/GameState';
+import { getSpecies } from '../data/species';
+import { getMove } from '../data/moves';
+import { calculateDamage } from '../combat/damage';
+import { tryCapture } from '../combat/capture';
+
+export interface BattleInitData {
+    kind: 'wild' | 'trainer';
+    enemyTeamSpeciesIds: string[];
+    trainerId?: string;
+}
+
+const TYPE_COLORS: Record<string, number> = {
+    fire: 0xd35400, water: 0x2980b9, grass: 0x27ae60,
+};
+
+export class Battle extends Scene {
+    private initData!: BattleInitData;
+    private playerTeam!: PokemonInstance[];
+    private enemyTeam!: PokemonInstance[];
+    private playerActive = 0;
+    private enemyActive = 0;
+    private menuGroup!: Phaser.GameObjects.Group;
+    // @ts-expect-error Field will be read by future tasks
+    private menuMode: 'main' | 'attack' | 'pokemon' | 'locked' = 'locked';
+    private navButtons: Array<{
+        bg: Phaser.GameObjects.Rectangle;
+        txt: Phaser.GameObjects.Text;
+        onClick: () => void;
+        disabled: boolean;
+    }> = [];
+    private navIndex = 0;
+    private escAction: (() => void) | null = null;
+
+    // Display refs we update later
+    private playerSprite!: Phaser.GameObjects.Rectangle;
+    private enemySprite!: Phaser.GameObjects.Rectangle;
+    private playerHpText!: Phaser.GameObjects.Text;
+    private enemyHpText!: Phaser.GameObjects.Text;
+    private playerHpBar!: Phaser.GameObjects.Rectangle;
+    private enemyHpBar!: Phaser.GameObjects.Rectangle;
+    private textBox!: Phaser.GameObjects.Text;
+
+    constructor() { super('Battle'); }
+
+    init(data: BattleInitData) {
+        this.initData = data;
+    }
+
+    create() {
+        this.playerTeam = GameState.playerTeam;
+        this.enemyTeam = this.initData.enemyTeamSpeciesIds.map((id) => {
+            const sp = getSpecies(id);
+            return { speciesId: id, currentHp: sp.baseHp, maxHp: sp.baseHp };
+        });
+
+        this.cameras.main.setBackgroundColor(0x303040);
+        this.add.rectangle(512, 384, 1004, 748, 0x202030).setStrokeStyle(2, 0xffffff);
+
+        this.makeEnemyArea();
+        this.makePlayerArea();
+        this.makeTextBox();
+
+        const opener = this.initData.kind === 'wild'
+            ? `Un ${getSpecies(this.enemyTeam[0].speciesId).name} sauvage apparaît !`
+            : `Le dresseur veut combattre !`;
+        this.setText(opener);
+
+        this.menuGroup = this.add.group();
+        this.time.delayedCall(500, () => this.showMainMenu());
+
+        const kb = this.input.keyboard!;
+        kb.on('keydown-LEFT',  () => this.navMove(-1));
+        kb.on('keydown-RIGHT', () => this.navMove(1));
+        kb.on('keydown-UP',    () => this.navMove(-1));
+        kb.on('keydown-DOWN',  () => this.navMove(1));
+        kb.on('keydown-ENTER', () => this.navConfirm());
+        kb.on('keydown-SPACE', () => this.navConfirm());
+        kb.on('keydown-ESC',   () => { if (this.escAction) this.escAction(); });
+
+        EventBus.emit('current-scene-ready', this);
+    }
+
+    private makeEnemyArea() {
+        const e = this.enemyTeam[this.enemyActive];
+        const sp = getSpecies(e.speciesId);
+
+        this.enemySprite = this.add.rectangle(768, 220, 80, 80, TYPE_COLORS[sp.type])
+            .setStrokeStyle(3, 0xffffff);
+
+        this.add.text(620, 140, sp.name, {
+            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
+        });
+        this.add.rectangle(620, 175, 200, 12, 0x444444).setOrigin(0, 0.5);
+        this.enemyHpBar = this.add.rectangle(620, 175, 200, 12, 0x44dd44).setOrigin(0, 0.5);
+        this.enemyHpText = this.add.text(620, 190, `${e.currentHp} / ${e.maxHp}`, {
+            fontFamily: 'Arial', fontSize: 14, color: '#ffffff',
+        });
+    }
+
+    private makePlayerArea() {
+        const p = this.playerTeam[this.playerActive];
+        const sp = getSpecies(p.speciesId);
+
+        this.playerSprite = this.add.rectangle(256, 480, 80, 80, TYPE_COLORS[sp.type])
+            .setStrokeStyle(3, 0xffffff);
+
+        this.add.text(360, 420, sp.name, {
+            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
+        });
+        this.add.rectangle(360, 455, 200, 12, 0x444444).setOrigin(0, 0.5);
+        this.playerHpBar = this.add.rectangle(360, 455, 200, 12, 0x44dd44).setOrigin(0, 0.5);
+        this.playerHpText = this.add.text(360, 470, `${p.currentHp} / ${p.maxHp}`, {
+            fontFamily: 'Arial', fontSize: 14, color: '#ffffff',
+        });
+    }
+
+    private makeTextBox() {
+        this.add.rectangle(512, 680, 1004, 120, 0x000000, 0.7).setStrokeStyle(2, 0xffffff);
+        this.textBox = this.add.text(40, 640, '', {
+            fontFamily: 'Arial', fontSize: 22, color: '#ffffff', wordWrap: { width: 950 },
+        });
+    }
+
+    private setText(s: string) {
+        this.textBox.setText(s);
+    }
+
+    private clearMenu() {
+        this.menuGroup.clear(true, true);
+        this.navButtons = [];
+        this.navIndex = 0;
+        this.escAction = null;
+    }
+
+    private showMainMenu() {
+        this.clearMenu();
+        this.menuMode = 'main';
+        const isWild = this.initData.kind === 'wild';
+        this.makeMenuButton(280, 660, 'Attaquer', () => this.showAttackMenu());
+        this.makeMenuButton(480, 660, 'Pokémon', () => this.showPokemonMenu());
+        this.makeMenuButton(680, 660, 'Ball',     () => this.playerThrowBall(), !isWild);
+        this.makeMenuButton(880, 660, 'Fuir',     () => this.playerFlee(), !isWild);
+        this.setText('Que faire ?');
+        this.escAction = null;
+    }
+
+    private showAttackMenu() {
+        this.clearMenu();
+        this.menuMode = 'attack';
+        const p = this.playerTeam[this.playerActive];
+        const sp = getSpecies(p.speciesId);
+        sp.moveIds.forEach((moveId, i) => {
+            this.makeMenuButton(280 + i * 200, 660, getMove(moveId).name, () => this.playerAttack(moveId));
+        });
+        this.makeMenuButton(880, 660, 'Retour', () => this.showMainMenu());
+        this.escAction = () => this.showMainMenu();
+    }
+
+    private showPokemonMenu() {
+        this.clearMenu();
+        this.menuMode = 'pokemon';
+        this.playerTeam.forEach((mon, i) => {
+            const sp = getSpecies(mon.speciesId);
+            const dead = mon.currentHp <= 0;
+            const active = i === this.playerActive;
+            const label = `${sp.name} ${mon.currentHp}/${mon.maxHp}${active ? ' *' : ''}`;
+            this.makeMenuButton(280 + i * 200, 660, label, () => this.playerSwitch(i), dead || active);
+        });
+        this.makeMenuButton(880, 660, 'Retour', () => this.showMainMenu());
+        this.escAction = () => this.showMainMenu();
+    }
+
+    private playerAttack(moveId: string) {
+        this.menuMode = 'locked';
+        this.clearMenu();
+        const move = getMove(moveId);
+        const attacker = this.playerTeam[this.playerActive];
+        const defender = this.enemyTeam[this.enemyActive];
+        const attackerSp = getSpecies(attacker.speciesId);
+        const defenderSp = getSpecies(defender.speciesId);
+
+        const dmg = calculateDamage({
+            power: move.power,
+            attackType: move.type,
+            attackerAtk: attackerSp.baseAtk,
+            defenderType: defenderSp.type,
+        });
+
+        this.setText(`${attackerSp.name} utilise ${move.name} !`);
+        this.flashAndDamage(this.enemySprite, () => {
+            defender.currentHp = Math.max(0, defender.currentHp - dmg);
+            this.refreshEnemyHp();
+            this.time.delayedCall(600, () => this.afterPlayerAction());
+        });
+    }
+
+    private afterPlayerAction() {
+        const defender = this.enemyTeam[this.enemyActive];
+        if (defender.currentHp <= 0) {
+            this.setText(`${getSpecies(defender.speciesId).name} est K.O. !`);
+            this.time.delayedCall(900, () => this.onEnemyFainted());
+            return;
+        }
+        this.enemyAttack();
+    }
+
+    private enemyAttack() {
+        const attacker = this.enemyTeam[this.enemyActive];
+        const defender = this.playerTeam[this.playerActive];
+        const sp = getSpecies(attacker.speciesId);
+        const defenderSp = getSpecies(defender.speciesId);
+
+        // Enemy AI: always uses its first move.
+        const move = getMove(sp.moveIds[0]);
+        const dmg = calculateDamage({
+            power: move.power,
+            attackType: move.type,
+            attackerAtk: sp.baseAtk,
+            defenderType: defenderSp.type,
+        });
+
+        this.setText(`${sp.name} utilise ${move.name} !`);
+        this.flashAndDamage(this.playerSprite, () => {
+            const idx = this.playerActive;
+            GameState.damagePokemon(idx, dmg);
+            this.refreshPlayerHp();
+            this.time.delayedCall(600, () => this.afterEnemyAction());
+        });
+    }
+
+    private afterEnemyAction() {
+        const def = this.playerTeam[this.playerActive];
+        if (def.currentHp <= 0) {
+            this.setText(`${getSpecies(def.speciesId).name} est K.O. !`);
+            this.time.delayedCall(900, () => this.onPlayerFainted());
+            return;
+        }
+        this.showMainMenu();
+    }
+
+    private onEnemyFainted() {
+        // Advance to next enemy Pokémon if any are still standing.
+        const next = this.enemyTeam.findIndex((p, i) => i > this.enemyActive && p.currentHp > 0);
+        if (next !== -1) {
+            this.enemyActive = next;
+            this.rebuildEnemyArea();
+            const sp = getSpecies(this.enemyTeam[next].speciesId);
+            this.setText(`L'adversaire envoie ${sp.name} !`);
+            this.time.delayedCall(900, () => this.showMainMenu());
+            return;
+        }
+        if (this.initData.kind === 'trainer' && this.initData.trainerId) {
+            GameState.markTrainerDefeated(this.initData.trainerId);
+        }
+        this.setText('Victoire !');
+        this.time.delayedCall(1200, () => this.returnToOverworld());
+    }
+
+    private onPlayerFainted() {
+        const aliveIndices = this.playerTeam
+            .map((p, i) => (p.currentHp > 0 ? i : -1))
+            .filter((i) => i !== -1);
+        if (aliveIndices.length === 0) {
+            this.setText('Toute ton équipe est K.O...');
+            this.time.delayedCall(1500, () => this.scene.start('GameOver'));
+            return;
+        }
+        this.setText('Choisis ton prochain Pokémon !');
+        this.time.delayedCall(700, () => this.showForcedSwitchMenu(aliveIndices));
+    }
+
+    private showForcedSwitchMenu(aliveIndices: number[]) {
+        this.clearMenu();
+        this.menuMode = 'pokemon';
+        aliveIndices.forEach((idx, i) => {
+            const mon = this.playerTeam[idx];
+            const sp = getSpecies(mon.speciesId);
+            const label = `${sp.name} ${mon.currentHp}/${mon.maxHp}`;
+            this.makeMenuButton(280 + i * 200, 660, label, () => this.forcedSwitch(idx));
+        });
+        this.escAction = null;
+    }
+
+    private forcedSwitch(index: number) {
+        this.menuMode = 'locked';
+        this.clearMenu();
+        this.playerActive = index;
+        this.rebuildPlayerArea();
+        const sp = getSpecies(this.playerTeam[index].speciesId);
+        this.setText(`En avant, ${sp.name} !`);
+        // Forced switch is FREE — no enemy turn. Go back to menu.
+        this.time.delayedCall(700, () => this.showMainMenu());
+    }
+
+    private rebuildEnemyArea() {
+        const e = this.enemyTeam[this.enemyActive];
+        const sp = getSpecies(e.speciesId);
+        this.enemySprite.setFillStyle(TYPE_COLORS[sp.type]);
+        this.enemyHpBar.setScale(1, 1);
+        this.refreshEnemyHp();
+        // Mask old name text and redraw (same trick as rebuildPlayerArea).
+        this.add.rectangle(620, 140, 240, 28, 0x202030).setOrigin(0, 0);
+        this.add.text(620, 140, sp.name, {
+            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
+        });
+    }
+
+    private playerSwitch(index: number) {
+        this.menuMode = 'locked';
+        this.clearMenu();
+        this.playerActive = index;
+        this.rebuildPlayerArea();
+        const sp = getSpecies(this.playerTeam[index].speciesId);
+        this.setText(`En avant, ${sp.name} !`);
+        this.time.delayedCall(700, () => this.enemyAttack());
+    }
+
+    private rebuildPlayerArea() {
+        const p = this.playerTeam[this.playerActive];
+        const sp = getSpecies(p.speciesId);
+        this.playerSprite.setFillStyle(TYPE_COLORS[sp.type]);
+        this.refreshPlayerHp();
+        // The original name label was drawn in makePlayerArea() and not stored.
+        // Mask it with a fresh rectangle of the background color, then redraw the name.
+        // Acceptable for placeholders; a polished version would store the text ref.
+        this.add.rectangle(360, 420, 240, 28, 0x202030);
+        this.add.text(360, 420, sp.name, {
+            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
+        }).setOrigin(0.5, 0);
+    }
+
+    private flashAndDamage(sprite: Phaser.GameObjects.Rectangle, after: () => void) {
+        const origColor = sprite.fillColor;
+        sprite.setFillStyle(0xff4040);
+        this.time.delayedCall(180, () => {
+            sprite.setFillStyle(origColor);
+            after();
+        });
+    }
+
+    private refreshEnemyHp() {
+        const e = this.enemyTeam[this.enemyActive];
+        const ratio = Math.max(0, e.currentHp / e.maxHp);
+        this.tweens.add({ targets: this.enemyHpBar, scaleX: ratio, duration: 300 });
+        this.enemyHpBar.setOrigin(0, 0.5);
+        this.enemyHpText.setText(`${e.currentHp} / ${e.maxHp}`);
+    }
+
+    private refreshPlayerHp() {
+        const p = this.playerTeam[this.playerActive];
+        const ratio = Math.max(0, p.currentHp / p.maxHp);
+        this.tweens.add({ targets: this.playerHpBar, scaleX: ratio, duration: 300 });
+        this.playerHpBar.setOrigin(0, 0.5);
+        this.playerHpText.setText(`${p.currentHp} / ${p.maxHp}`);
+    }
+
+    private playerThrowBall() {
+        this.menuMode = 'locked';
+        this.clearMenu();
+        const wild = this.enemyTeam[0];
+        const sp = getSpecies(wild.speciesId);
+        this.setText(`Tu lances une Ball sur ${sp.name} !`);
+
+        // Animated ball: white circle tweens from player area toward enemy
+        const ball = this.add.circle(256, 480, 12, 0xffffff).setStrokeStyle(2, 0xff0000);
+        this.tweens.add({
+            targets: ball,
+            x: 768, y: 220,
+            duration: 500,
+            onComplete: () => {
+                this.tweens.add({
+                    targets: ball, angle: 360, duration: 600, repeat: 2,
+                    onComplete: () => {
+                        ball.destroy();
+                        const caught = tryCapture(wild.currentHp, wild.maxHp);
+                        if (caught) this.onCaptureSuccess();
+                        else this.onCaptureFail();
+                    },
+                });
+            },
+        });
+    }
+
+    private onCaptureSuccess() {
+        const wild = this.enemyTeam[0];
+        const sp = getSpecies(wild.speciesId);
+        if (GameState.playerTeam.length >= 3) {
+            this.setText(`Tu as déjà 3 Pokémon. ${sp.name} est relâché.`);
+        } else {
+            GameState.addToTeam({
+                speciesId: wild.speciesId,
+                currentHp: wild.currentHp,
+                maxHp: wild.maxHp,
+            });
+            this.setText(`Capture réussie ! ${sp.name} rejoint l'équipe.`);
+        }
+        this.time.delayedCall(1500, () => this.returnToOverworld());
+    }
+
+    private onCaptureFail() {
+        this.setText(`Zut, ${getSpecies(this.enemyTeam[0].speciesId).name} s'est échappé !`);
+        this.time.delayedCall(1000, () => this.enemyAttack());
+    }
+
+    private playerFlee() {
+        this.menuMode = 'locked';
+        this.clearMenu();
+        this.setText('Tu prends la fuite !');
+        this.time.delayedCall(800, () => this.returnToOverworld());
+    }
+
+    private returnToOverworld() {
+        this.scene.start('Overworld');
+    }
+
+    private refreshHighlight() {
+        this.navButtons.forEach((n, i) => {
+            if (n.disabled) return;
+            const highlighted = i === this.navIndex;
+            n.bg.setStrokeStyle(highlighted ? 4 : 2, highlighted ? 0xffff00 : 0xffffff);
+            n.bg.setFillStyle(highlighted ? 0x0088ff : 0x0066cc);
+        });
+    }
+
+    private navMove(delta: number) {
+        if (this.navButtons.length === 0) return;
+        let i = this.navIndex;
+        for (let step = 0; step < this.navButtons.length; step++) {
+            i = (i + delta + this.navButtons.length) % this.navButtons.length;
+            if (!this.navButtons[i].disabled) { this.navIndex = i; this.refreshHighlight(); return; }
+        }
+    }
+
+    private navConfirm() {
+        const b = this.navButtons[this.navIndex];
+        if (b && !b.disabled) b.onClick();
+    }
+
+    private makeMenuButton(x: number, y: number, label: string, onClick: () => void, disabled = false) {
+        const bg = this.add.rectangle(x, y, 180, 40, disabled ? 0x555555 : 0x0066cc)
+            .setStrokeStyle(2, 0xffffff);
+        const txt = this.add.text(x, y, label, {
+            fontFamily: 'Arial Black', fontSize: 18,
+            color: disabled ? '#999999' : '#ffffff',
+        }).setOrigin(0.5);
+
+        if (!disabled) {
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => { this.navIndex = this.navButtons.findIndex((n) => n.bg === bg); this.refreshHighlight(); });
+            bg.on('pointerdown', onClick);
+        }
+
+        this.menuGroup.add(bg);
+        this.menuGroup.add(txt);
+        this.navButtons.push({ bg, txt, onClick, disabled });
+
+        // Default highlight to first non-disabled button
+        if (!disabled && this.navButtons.filter((n) => !n.disabled).length === 1) {
+            this.navIndex = this.navButtons.length - 1;
+        }
+        this.refreshHighlight();
+    }
+}
