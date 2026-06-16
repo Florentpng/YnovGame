@@ -4,6 +4,7 @@ import type { IRefPhaserGame } from "./PhaserGame";
 import "./App.css";
 import type { Game } from "./game/scenes/Game";
 import type { MainMenu } from "./game/scenes/MainMenu";
+import animationGame from "./assets/animation_game.mp4";
 
 interface FormProps {
   isLoginMode: boolean;
@@ -36,7 +37,7 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
         
         const video = document.createElement("video");
 
-        video.src = "./assets/animation_game.mp4";
+        video.src = animationGame;
         video.autoplay = true;
         video.muted = true;
         video.style.position = "fixed";
