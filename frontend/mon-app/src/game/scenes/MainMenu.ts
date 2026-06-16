@@ -1,76 +1,31 @@
-import { GameObjects, Scene } from 'phaser';
-
+import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
 
-export class MainMenu extends Scene
-{
-    background!: GameObjects.Image;
-    logo!: GameObjects.Image;
-    title!: GameObjects.Text;
-    logoTween!: Phaser.Tweens.Tween | null;
+export class MainMenu extends Scene {
+    constructor() { super('MainMenu'); }
 
-    constructor ()
-    {
-        super('MainMenu');
-    }
-
-    create ()
-    {
-        this.background = this.add.image(512, 384, 'background');
-
-        this.logo = this.add.image(512, 300, 'logo').setDepth(100);
-
-        this.title = this.add.text(512, 460, 'Main Menu', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
+    create() {
+        this.add.text(512, 240, 'Pokémon-like', {
+            fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
+        }).setOrigin(0.5);
+
+        this.add.text(512, 340, '(prototype)', {
+            fontFamily: 'Arial', fontSize: 20, color: '#cccccc',
+        }).setOrigin(0.5);
+
+        const button = this.add.text(512, 480, 'Démarrer', {
+            fontFamily: 'Arial Black', fontSize: 36, color: '#ffffff',
+            backgroundColor: '#0066cc', padding: { x: 24, y: 12 },
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        button.on('pointerover', () => button.setBackgroundColor('#0088ff'));
+        button.on('pointerout', () => button.setBackgroundColor('#0066cc'));
+        button.on('pointerdown', () => this.scene.start('StarterSelect'));
+
+        this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('StarterSelect'));
+        this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('StarterSelect'));
 
         EventBus.emit('current-scene-ready', this);
-    }
-    
-    changeScene ()
-    {
-        if (this.logoTween)
-        {
-            this.logoTween.stop();
-            this.logoTween = null;
-        }
-
-        this.scene.start('Game');
-    }
-
-    moveLogo (vueCallback: ({ x, y }: { x: number, y: number }) => void)
-    {
-        if (this.logoTween)
-        {
-            if (this.logoTween.isPlaying())
-            {
-                this.logoTween.pause();
-            }
-            else
-            {
-                this.logoTween.play();
-            }
-        } 
-        else
-        {
-            this.logoTween = this.tweens.add({
-                targets: this.logo,
-                x: { value: 750, duration: 3000, ease: 'Back.easeInOut' },
-                y: { value: 80, duration: 1500, ease: 'Sine.easeOut' },
-                yoyo: true,
-                repeat: -1,
-                onUpdate: () => {
-                    if (vueCallback)
-                    {
-                        vueCallback({
-                            x: Math.floor(this.logo.x),
-                            y: Math.floor(this.logo.y)
-                        });
-                    }
-                }
-            });
-        }
     }
 }

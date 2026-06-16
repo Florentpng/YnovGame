@@ -1,7 +1,7 @@
 import type { PokemonType } from './types';
 import type { MoveId } from './moves';
 
-export type SpeciesId = 'eliegateur' | 'lucatata' | 'thivolt' | 'facundor' | 'matteon' | 'eleamite' | 'costarica' | 'aurorise' | 'johnyx' | 'richettin' | 'crombul';
+export type SpeciesId = 'eliegateur' | 'lucatata' | 'thivaltout' | 'triocundo' | 'matterio' | 'moustea' | 'costarica' | 'lapaurore' | 'johnyon' | 'ramochet' | 'crombelebi' | 'grolumiere';
 
 export interface SpeciesDef {
     id: string;
@@ -13,17 +13,18 @@ export interface SpeciesDef {
 }
 
 export const SPECIES: Record<SpeciesId, SpeciesDef> = {
-    eliegateur: { id: '1',  name: 'Eliegateur', type: 'dark',     baseHp: 30, baseAtk: 12, moveIds: ['dard_venin', 'acide'] },
-    lucatata:   { id: '2',  name: 'Lucatata',   type: 'normal',   baseHp: 10, baseAtk: 10, moveIds: ['charge', 'murmure'] },
-    thivolt:    { id: '3',  name: 'Thivolt',    type: 'electric', baseHp: 34, baseAtk: 9,  moveIds: ['electrochoc', 'etincelle'] },
-    facundor:   { id: '4',  name: 'Facundor',   type: 'steel',    baseHp: 25, baseAtk: 11, moveIds: ['poing_comete', 'balayage'] },
-    matteon:    { id: '5',  name: 'Matteon',    type: 'fighting', baseHp: 27, baseAtk: 9,  moveIds: ['poing_comete', 'balayage'] },
-    eleamite:   { id: '6',  name: 'Eleamite',   type: 'water',    baseHp: 28, baseAtk: 8,  moveIds: ['pistolet_o', 'bulles'] },
-    costarica:  { id: '7',  name: 'Costarica',  type: 'fire',     baseHp: 22, baseAtk: 10, moveIds: ['flammeche', 'griffe'] },
-    aurorise:   { id: '8',  name: 'Aurorise',   type: 'fire',     baseHp: 24, baseAtk: 8,  moveIds: ['flammeche', 'griffe'] },
-    johnyx:     { id: '10', name: 'Johnyx',     type: 'rock',     baseHp: 20, baseAtk: 9,  moveIds: ['jet_pierres', 'seisme'] },
-    richettin:  { id: '11', name: 'Richettin',  type: 'grass',    baseHp: 21, baseAtk: 7,  moveIds: ['fouet_lianes', 'tranchherbe'] },
-    crombul:    { id: '12', name: 'Crombul',    type: 'psychic',  baseHp: 23, baseAtk: 6,  moveIds: ['psyko', 'choc_mental'] },
+    eliegateur: { id: '1',  name: 'Eliegateur', type: 'tenebres',     baseHp: 30, baseAtk: 12, moveIds: ['discord', 'monster_sucre'] },
+    lucatata:   { id: '2',  name: 'Lucatata',   type: 'normal',   baseHp: 2, baseAtk: 1, moveIds: ['tier_temps', 'PL'] },
+    thivaltout:    { id: '3',  name: 'Thivaltout',    type: 'poison', baseHp: 34, baseAtk: 9,  moveIds: ['rose', 'duper'] },
+    triocundo:   { id: '4',  name: 'Triocundo',   type: 'sol',    baseHp: 25, baseAtk: 11, moveIds: ['coup_d_boul', 'raouleguibele'] },
+    matterio:    { id: '5',  name: 'Matterio',    type: 'combat', baseHp: 27, baseAtk: 9,  moveIds: ['jab', 'jiu_jitsu'] },
+    moustea:   { id: '6',  name: 'Moustéa',   type: 'eau',    baseHp: 28, baseAtk: 8,  moveIds: ['zero', 'stage'] },
+    costarica:  { id: '7',  name: 'Costarica',  type: 'roche',     baseHp: 22, baseAtk: 10, moveIds: ['emploi_fictif', 'mastere_cyber'] },
+    lapaurore:   { id: '8',  name: 'Lapaurore',   type: 'feu',     baseHp: 24, baseAtk: 8,  moveIds: ['absence_injustifiee', 'convocation'] },
+    johnyon:     { id: '9', name: 'Johnyon',     type: 'electrique',     baseHp: 20, baseAtk: 9,  moveIds: ['drop_table', 'react'] },
+    ramochet:  { id: '10', name: 'Ramochet',  type: 'plante',    baseHp: 21, baseAtk: 7,  moveIds: ['disparition', 'pause'] },
+    crombelebi:    { id: '11', name: 'Crombélébi',    type: 'fee',  baseHp: 23, baseAtk: 6,  moveIds: ['these', 'antithese'] },
+    grolumiere:    { id: '12', name: 'Grolumiere',    type: 'psy',  baseHp: 23, baseAtk: 6,  moveIds: ['esquive', 'IA'] },
 };
 
 const ALL_SPECIES_IDS = Object.keys(SPECIES) as SpeciesId[];

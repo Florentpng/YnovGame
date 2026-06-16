@@ -1,4 +1,4 @@
-export type PokemonType = | 'fire' | 'water' | 'grass' | 'electric' | 'psychic' | 'normal' | 'fighting' | 'poison' | 'rock' | 'steel' | 'dark';
+export type PokemonType = | 'tenebres' | 'normal' | 'eau' | 'poison' | 'sol' | 'fee' | 'combat' | 'roche' | 'plante' | 'electrique' | 'feu' | 'psy';
 export type MoveType = PokemonType | 'neutral';
 export type TileType = 'path' | 'tall_grass' | 'short_grass' | 'tree' | 'water';
 
