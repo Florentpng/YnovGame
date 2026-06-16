@@ -4,6 +4,7 @@ import type { IRefPhaserGame } from "./PhaserGame";
 import "./App.css";
 import type { Game } from "./game/scenes/Game";
 import type { MainMenu } from "./game/scenes/MainMenu";
+import animationGame from "./assets/animation_game.mp4";
 
 interface FormProps {
   isLoginMode: boolean;
@@ -33,7 +34,40 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
       });
 
       if (response.status === 200) {
-        setIsLoggedIn(true);
+        
+        const video = document.createElement("video");
+
+        video.src = animationGame;
+        video.autoplay = true;
+        video.muted = true;
+        video.style.position = "fixed";
+        video.style.top = "0";
+        video.style.left = "0";
+        video.style.width = "100vw";
+        video.style.height = "100vh";
+        video.style.objectFit = "cover";
+        video.style.zIndex = "9999";
+
+        document.body.appendChild(video);
+
+        video.onerror = () => {
+          console.log("Erreur vidéo");
+          console.log("video.error =", video.error);
+        
+          if (video.error) {
+            console.log("code =", video.error.code);
+            console.log("message =", video.error.message);
+          }
+        
+          console.log("src =", video.currentSrc);
+        };
+
+        video.onended = () => {
+          document.body.removeChild(video);
+
+          // Continuer après l'animation
+          setIsLoggedIn(true);
+        };
       } else {
         alert(response.statusText);
       }
@@ -84,11 +118,10 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
 
     <div className="retro-container">
       <form onSubmit={handleSubmit} className="retro-form-box">
-        
         <h2 className="retro-heading">
           {isLoginMode ? "CONNEXION" : "INSCRIPTION"}
         </h2>
-        
+
         <div className="retro-input-container">
           <label className="retro-label">Pseudo :</label>
           <input
@@ -119,16 +152,15 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
           <button type="submit" className="retro-submit-btn">
             VALIDER <span className="retro-arrow">▶</span>
           </button>
-          
-          <button 
-            type="button" 
-            onClick={() => setIsLoginMode(!isLoginMode)} 
+
+          <button
+            type="button"
+            onClick={() => setIsLoginMode(!isLoginMode)}
             className="retro-switch-btn"
           >
             {isLoginMode ? "Créer un compte" : "Déjà inscrit ?"}
           </button>
         </div>
-
       </form>
     </div>
   );
@@ -198,8 +230,7 @@ function App() {
               e.preventDefault();
               setIsLoginMode(!isLoginMode);
             }}
-          >
-          </a>
+          ></a>
         </section>
       ) : (
         <section id="game-section">

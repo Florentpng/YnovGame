@@ -198,9 +198,12 @@
   align-items: center;
   min-height: 100vh;
   background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-  url('login_background.png');
+                    url('./assets/login_background.png');
   font-family: 'Press Start 2P', monospace;
   box-sizing: border-box;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;        
 }
 
 /* Boîte de dialogue style Game Boy */
