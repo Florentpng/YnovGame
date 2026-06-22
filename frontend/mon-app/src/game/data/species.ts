@@ -18,7 +18,7 @@ export type SpeciesId =
 export interface SpeciesDef {
   id: string;
   name: string;
-  imageUrl: string;
+  imageUrl: string; // Utile pour tes composants React (ex: TeamPanel.tsx)
   type: PokemonType;
   baseHp: number;
   baseAtk: number;
@@ -29,7 +29,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   eliegateur: {
     id: "1",
     name: "Eliegateur",
-    imageUrl: "../../assets/eliegateur.png",
+    imageUrl: "/eliegateur.png", // MODIFICATION : Chemin public direct
     type: "tenebres",
     baseHp: 30,
     baseAtk: 12,
@@ -38,7 +38,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   lucatata: {
     id: "2",
     name: "Lucatata",
-    imageUrl: "../../assets/lucatata.png",
+    imageUrl: "/lucatata.png",
     type: "normal",
     baseHp: 2,
     baseAtk: 1,
@@ -47,7 +47,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   thivaltout: {
     id: "3",
     name: "Thivaltout",
-    imageUrl: "../../assets/thivaltout.png",
+    imageUrl: "/thivaltout.png",
     type: "poison",
     baseHp: 34,
     baseAtk: 9,
@@ -56,7 +56,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   triocundo: {
     id: "4",
     name: "Triocundo",
-    imageUrl: "../../assets/triocundo.png",
+    imageUrl: "/triocundo.png",
     type: "sol",
     baseHp: 25,
     baseAtk: 11,
@@ -65,7 +65,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   matterio: {
     id: "5",
     name: "Matterio",
-    imageUrl: "../../assets/matterio.png",
+    imageUrl: "/matterio.png",
     type: "combat",
     baseHp: 27,
     baseAtk: 9,
@@ -74,7 +74,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   moustea: {
     id: "6",
     name: "Moustéa",
-    imageUrl: "../../assets/moustea.png",
+    imageUrl: "/moustea.png",
     type: "eau",
     baseHp: 28,
     baseAtk: 8,
@@ -83,7 +83,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   costarica: {
     id: "7",
     name: "Costarica",
-    imageUrl: "../../assets/costarica.png",
+    imageUrl: "/costarica.png",
     type: "roche",
     baseHp: 22,
     baseAtk: 10,
@@ -92,7 +92,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   lapaurore: {
     id: "8",
     name: "Lapaurore",
-    imageUrl: "../../assets/lapaurore.png",
+    imageUrl: "/lapaurore.png",
     type: "feu",
     baseHp: 24,
     baseAtk: 8,
@@ -101,7 +101,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   johnyon: {
     id: "9",
     name: "Johnyon",
-    imageUrl: "../../assets/johnyon.png",
+    imageUrl: "/johnyon.png",
     type: "electrique",
     baseHp: 20,
     baseAtk: 9,
@@ -110,7 +110,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   ramochet: {
     id: "10",
     name: "Ramochet",
-    imageUrl: "../../assets/ramochet.png",
+    imageUrl: "/ramochet.png",
     type: "plante",
     baseHp: 21,
     baseAtk: 7,
@@ -119,7 +119,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   crombelebi: {
     id: "11",
     name: "Crombélébi",
-    imageUrl: "../../assets/crombelebi.png",
+    imageUrl: "/crombelebi.png",
     type: "fee",
     baseHp: 23,
     baseAtk: 6,
@@ -128,7 +128,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   grolumiere: {
     id: "12",
     name: "Grolumiere",
-    imageUrl: "../../assets/grolumiere.png",
+    imageUrl: "/grolumiere.png",
     type: "psy",
     baseHp: 23,
     baseAtk: 6,
