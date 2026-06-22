@@ -2,9 +2,8 @@ import { useRef, useState } from "react";
 import { PhaserGame } from "./PhaserGame";
 import type { IRefPhaserGame } from "./PhaserGame";
 import "./App.css";
-import type { Game } from "./game/scenes/Game";
-import type { MainMenu } from "./game/scenes/MainMenu";
 import animationGame from "./assets/animation_game.mp4";
+import { TeamPanel } from "./components/TeamPanel";
 
 interface FormProps {
   isLoginMode: boolean;
@@ -34,7 +33,6 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
       });
 
       if (response.status === 200) {
-        
         const video = document.createElement("video");
 
         video.src = animationGame;
@@ -53,12 +51,12 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
         video.onerror = () => {
           console.log("Erreur vidéo");
           console.log("video.error =", video.error);
-        
+
           if (video.error) {
             console.log("code =", video.error.code);
             console.log("message =", video.error.message);
           }
-        
+
           console.log("src =", video.currentSrc);
         };
 
@@ -170,50 +168,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
 
-  const [canMoveSprite, setCanMoveSprite] = useState(true);
   const phaserRef = useRef<IRefPhaserGame | null>(null);
-  const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
-
-  const changeScene = () => {
-    if (phaserRef.current) {
-      const scene = phaserRef.current.scene as Game;
-      if (scene) scene.changeScene();
-    }
-  };
-
-  const moveSprite = () => {
-    if (phaserRef.current) {
-      const scene = phaserRef.current.scene as MainMenu;
-      if (scene && scene.scene.key === "MainMenu") {
-        scene.moveLogo(({ x, y }) => {
-          setSpritePosition({ x, y });
-        });
-      }
-    }
-  };
-
-  const addSprite = () => {
-    if (phaserRef.current) {
-      const scene = phaserRef.current.scene;
-      if (scene) {
-        const x = Phaser.Math.Between(64, scene.scale.width - 64);
-        const y = Phaser.Math.Between(64, scene.scale.height - 64);
-        const star = scene.add.sprite(x, y, "star");
-
-        scene.add.tween({
-          targets: star,
-          duration: 500 + Math.random() * 1000,
-          alpha: 0,
-          yoyo: true,
-          repeat: -1,
-        });
-      }
-    }
-  };
-
-  const currentScene = (scene: Phaser.Scene) => {
-    setCanMoveSprite(scene.scene.key !== "MainMenu");
-  };
 
   return (
     <>
@@ -233,36 +188,12 @@ function App() {
           ></a>
         </section>
       ) : (
-        <section id="game-section">
-          <div id="app">
-            <PhaserGame ref={phaserRef} currentActiveScene={currentScene} />
-            <div>
-              <div>
-                <button className="button" onClick={changeScene}>
-                  Change Scene
-                </button>
-              </div>
-              <div>
-                <button
-                  disabled={canMoveSprite}
-                  className="button"
-                  onClick={moveSprite}
-                >
-                  Toggle Movement
-                </button>
-              </div>
-              <div className="spritePosition">
-                Sprite Position:
-                <pre>{`{\n  x: ${spritePosition.x}\n  y: ${spritePosition.y}\n}`}</pre>
-              </div>
-              <div>
-                <button className="button" onClick={addSprite}>
-                  Add New Sprite
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <div id="app" style={{ display: "flex" }}>
+          <PhaserGame ref={phaserRef} currentActiveScene={() => {}} />
+          <aside style={{ width: 240, background: "Black", minHeight: 768 }}>
+            <TeamPanel />
+          </aside>
+        </div>
       )}
     </>
   );

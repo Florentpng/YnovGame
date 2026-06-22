@@ -1,9 +1,18 @@
 import type { PokemonType, MoveType } from '../data/types';
 
 const CHART: Record<PokemonType, PokemonType> = {
-    fire: 'grass',
-    grass: 'water',
-    water: 'fire',
+    feu: 'feu',
+    plante: 'plante',
+    eau: 'eau',
+    electrique: 'electrique',
+    psy: 'psy',
+    normal: 'normal',
+    combat: 'combat',
+    poison: 'poison',
+    roche: 'roche',
+    sol: 'sol',
+    tenebres: 'tenebres',
+    fee: 'fee'
 };
 
 export function typeMultiplier(attackType: MoveType, defenderType: PokemonType): number {
