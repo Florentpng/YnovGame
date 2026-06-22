@@ -34,9 +34,10 @@ export class Battle extends Scene {
     private navIndex = 0;
     private escAction: (() => void) | null = null;
 
-    // Display refs we update later
-    private playerSprite!: Phaser.GameObjects.Rectangle;
-    private enemySprite!: Phaser.GameObjects.Rectangle;
+    // MODIFICATION : Utilisation de Phaser.GameObjects.Sprite à la place de Rectangle
+    private playerSprite!: Phaser.GameObjects.Sprite;
+    private enemySprite!: Phaser.GameObjects.Sprite;
+    
     private playerHpText!: Phaser.GameObjects.Text;
     private enemyHpText!: Phaser.GameObjects.Text;
     private playerHpBar!: Phaser.GameObjects.Rectangle;
@@ -47,30 +48,38 @@ export class Battle extends Scene {
 
     init(data: BattleInitData) {
         this.initData = data;
-    }
-
-    create() {
+        
+        // Récupération immédiate des équipes pour le preload
         this.playerTeam = GameState.playerTeam;
         this.enemyTeam = this.initData.enemyTeamSpeciesIds.map((id) => {
             const sp = getSpecies(id);
             return { speciesId: id, currentHp: sp.baseHp, maxHp: sp.baseHp };
         });
+    }
 
-        this.cameras.main.setBackgroundColor(0x303040);
-        this.add.rectangle(512, 384, 1004, 748, 0x202030).setStrokeStyle(2, 0xffffff);
-
+    create() {
+        // 1. On affiche l'image de fond en premier (centrée au milieu de l'écran : 512, 300)
+        const background = this.add.image(512, 315, 'battle_background');
+        
+        // 2. On force l'image à s'adapter aux dimensions de ton jeu (1004 x 748)
+        background.setDisplaySize(1004, 605);
+    
+        // 3. On garde juste le contour blanc (on enlève la couleur opaque 0x202030)
+        this.add.rectangle(512, 384, 1004, 748).setStrokeStyle(2, 0xffffff);
+    
+        // 4. On dessine tout le reste par-dessus (Pokémon, textes, menus)
         this.makeEnemyArea();
         this.makePlayerArea();
         this.makeTextBox();
-
+    
         const opener = this.initData.kind === 'wild'
             ? `Un ${getSpecies(this.enemyTeam[0].speciesId).name} sauvage apparaît !`
             : `Le dresseur veut combattre !`;
         this.setText(opener);
-
+    
         this.menuGroup = this.add.group();
         this.time.delayedCall(500, () => this.showMainMenu());
-
+    
         const kb = this.input.keyboard!;
         kb.on('keydown-LEFT',  () => this.navMove(-1));
         kb.on('keydown-RIGHT', () => this.navMove(1));
@@ -79,23 +88,34 @@ export class Battle extends Scene {
         kb.on('keydown-ENTER', () => this.navConfirm());
         kb.on('keydown-SPACE', () => this.navConfirm());
         kb.on('keydown-ESC',   () => { if (this.escAction) this.escAction(); });
-
+    
         EventBus.emit('current-scene-ready', this);
     }
 
     private makeEnemyArea() {
         const e = this.enemyTeam[this.enemyActive];
         const sp = getSpecies(e.speciesId);
+    
+        this.enemySprite = this.add.sprite(768, 250, e.speciesId);
 
-        this.enemySprite = this.add.rectangle(768, 220, 80, 80, TYPE_COLORS[sp.type])
-            .setStrokeStyle(3, 0xffffff);
-
-        this.add.text(620, 140, sp.name, {
+        this.enemySprite.setDisplaySize(260, 260);
+    
+        // MODIFICATION : On décale tout vers la gauche (ex: X = 480)
+        const infoX = 220;
+        const infoY = 180;
+    
+        this.add.text(infoX, infoY, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         });
-        this.add.rectangle(620, 175, 200, 12, 0x444444).setOrigin(0, 0.5);
-        this.enemyHpBar = this.add.rectangle(620, 175, 200, 12, 0x44dd44).setOrigin(0, 0.5);
-        this.enemyHpText = this.add.text(620, 190, `${e.currentHp} / ${e.maxHp}`, {
+        
+        // Le fond de la jauge
+        this.add.rectangle(infoX, infoY + 40, 200, 12, 0x444444).setOrigin(0, 0.5);
+        
+        // La jauge verte
+        this.enemyHpBar = this.add.rectangle(infoX, infoY + 40, 200, 12, 0x44dd44).setOrigin(0, 0.5);
+        
+        // Le texte des PV
+        this.enemyHpText = this.add.text(infoX, infoY + 60, `${e.currentHp} / ${e.maxHp}`, {
             fontFamily: 'Arial', fontSize: 14, color: '#ffffff',
         });
     }
@@ -104,15 +124,25 @@ export class Battle extends Scene {
         const p = this.playerTeam[this.playerActive];
         const sp = getSpecies(p.speciesId);
 
-        this.playerSprite = this.add.rectangle(256, 480, 80, 80, TYPE_COLORS[sp.type])
-            .setStrokeStyle(3, 0xffffff);
+        this.playerSprite = this.add.sprite(256, 495, p.speciesId);
 
-        this.add.text(360, 420, sp.name, {
+        this.playerSprite.setDisplaySize(290, 290);
+
+        const infoX = 620;
+        const infoY = 470;
+
+        this.add.text(infoX, infoY, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         });
-        this.add.rectangle(360, 455, 200, 12, 0x444444).setOrigin(0, 0.5);
-        this.playerHpBar = this.add.rectangle(360, 455, 200, 12, 0x44dd44).setOrigin(0, 0.5);
-        this.playerHpText = this.add.text(360, 470, `${p.currentHp} / ${p.maxHp}`, {
+
+        // Le fond de la jauge
+        this.add.rectangle(infoX, infoY + 40, 200, 12, 0x444444).setOrigin(0, 0.5);
+
+        // La jauge verte
+        this.playerHpBar = this.add.rectangle(infoX, infoY + 40, 200, 12, 0x44dd44).setOrigin(0, 0.5);
+
+        // Le texte des PV
+        this.playerHpText = this.add.text(infoX, infoY + 60, `${p.currentHp} / ${p.maxHp}`, {
             fontFamily: 'Arial', fontSize: 14, color: '#ffffff',
         });
     }
@@ -213,7 +243,6 @@ export class Battle extends Scene {
         const sp = getSpecies(attacker.speciesId);
         const defenderSp = getSpecies(defender.speciesId);
 
-        // Enemy AI: always uses its first move.
         const move = getMove(sp.moveIds[0]);
         const dmg = calculateDamage({
             power: move.power,
@@ -242,7 +271,6 @@ export class Battle extends Scene {
     }
 
     private onEnemyFainted() {
-        // Advance to next enemy Pokémon if any are still standing.
         const next = this.enemyTeam.findIndex((p, i) => i > this.enemyActive && p.currentHp > 0);
         if (next !== -1) {
             this.enemyActive = next;
@@ -291,17 +319,18 @@ export class Battle extends Scene {
         this.rebuildPlayerArea();
         const sp = getSpecies(this.playerTeam[index].speciesId);
         this.setText(`En avant, ${sp.name} !`);
-        // Forced switch is FREE — no enemy turn. Go back to menu.
         this.time.delayedCall(700, () => this.showMainMenu());
     }
 
     private rebuildEnemyArea() {
         const e = this.enemyTeam[this.enemyActive];
         const sp = getSpecies(e.speciesId);
-        this.enemySprite.setFillStyle(TYPE_COLORS[sp.type]);
+        
+        // MODIFICATION : Changement de texture pour le nouveau Pokémon adverse envoyé
+        this.enemySprite.setTexture(e.speciesId);
+        
         this.enemyHpBar.setScale(1, 1);
         this.refreshEnemyHp();
-        // Mask old name text and redraw (same trick as rebuildPlayerArea).
         this.add.rectangle(620, 140, 240, 28, 0x202030).setOrigin(0, 0);
         this.add.text(620, 140, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
@@ -321,22 +350,22 @@ export class Battle extends Scene {
     private rebuildPlayerArea() {
         const p = this.playerTeam[this.playerActive];
         const sp = getSpecies(p.speciesId);
-        this.playerSprite.setFillStyle(TYPE_COLORS[sp.type]);
+        
+        // MODIFICATION : Changement de texture pour le nouveau Pokémon joueur envoyé
+        this.playerSprite.setTexture(p.speciesId);
+        
         this.refreshPlayerHp();
-        // The original name label was drawn in makePlayerArea() and not stored.
-        // Mask it with a fresh rectangle of the background color, then redraw the name.
-        // Acceptable for placeholders; a polished version would store the text ref.
         this.add.rectangle(360, 420, 240, 28, 0x202030);
         this.add.text(360, 420, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         }).setOrigin(0.5, 0);
     }
 
-    private flashAndDamage(sprite: Phaser.GameObjects.Rectangle, after: () => void) {
-        const origColor = sprite.fillColor;
-        sprite.setFillStyle(0xff4040);
+    // MODIFICATION : Changement de type vers Phaser.GameObjects.Sprite + Clignotement via "Tint"
+    private flashAndDamage(sprite: Phaser.GameObjects.Sprite, after: () => void) {
+        sprite.setTint(0xff4040); // Teinte rouge de dégâts
         this.time.delayedCall(180, () => {
-            sprite.setFillStyle(origColor);
+            sprite.clearTint(); // Restaure l'image originale
             after();
         });
     }
@@ -364,7 +393,6 @@ export class Battle extends Scene {
         const sp = getSpecies(wild.speciesId);
         this.setText(`Tu lances une Ball sur ${sp.name} !`);
 
-        // Animated ball: white circle tweens from player area toward enemy
         const ball = this.add.circle(256, 480, 12, 0xffffff).setStrokeStyle(2, 0xff0000);
         this.tweens.add({
             targets: ball,
@@ -457,7 +485,6 @@ export class Battle extends Scene {
         this.menuGroup.add(txt);
         this.navButtons.push({ bg, txt, onClick, disabled });
 
-        // Default highlight to first non-disabled button
         if (!disabled && this.navButtons.filter((n) => !n.disabled).length === 1) {
             this.navIndex = this.navButtons.length - 1;
         }
