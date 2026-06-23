@@ -122,7 +122,6 @@ export class Overworld extends Scene {
 
     private checkEncounters(x: number, y: number) {
 
-        // ---- RENCONTRE SPÉCIALE ----
         if (x === 5 && y === 8) {
             this.startBattle({
                 kind: 'wild',
@@ -141,18 +140,21 @@ export class Overworld extends Scene {
         for (const a of adj) {
             const t = this.trainerAt(a.x, a.y);
             if (t) {
-                // MODIFICATION : On s'assure d'envoyer la bonne structure attendue par Battle.ts
-                this.startBattle({
+                const randomTrainerTeam: string[] = [];
+                for (let i = 0; i < t.teamSpeciesIds.length; i++) {
+                    const randomIndex = Math.floor(Math.random() * WILD_IDS.length);
+                    randomTrainerTeam.push(WILD_IDS[randomIndex]);
+                }
+                
+                this.scene.start('Battle', {
                     kind: 'trainer',
-                    // Si ton Battle.ts attend une liste d'IDs sous un autre nom, ajuste ici :
-                    enemyTeamSpeciesIds: t.teamSpeciesIds, 
-                    trainerId: t.id,
+                    enemyTeamSpeciesIds: randomTrainerTeam, // La nouvelle équipe !
+                    trainerId: t.id
                 });
                 return;
             }
         }
     
-        // 2. Rencontre sauvage (herbe)
         if (MAIN_MAP[y][x] === 'tall_grass' && Math.random() < 0.1) {
             const speciesId = WILD_IDS[Math.floor(Math.random() * WILD_IDS.length)];
             this.startBattle({

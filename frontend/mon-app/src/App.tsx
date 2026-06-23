@@ -3,7 +3,6 @@ import { PhaserGame } from "./PhaserGame";
 import type { IRefPhaserGame } from "./PhaserGame";
 import "./App.css";
 import animationGame from "./assets/animation_game.mp4";
-import { TeamPanel } from "./components/TeamPanel";
 
 interface FormProps {
   isLoginMode: boolean;
@@ -63,7 +62,6 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
         video.onended = () => {
           document.body.removeChild(video);
 
-          // Continuer après l'animation
           setIsLoggedIn(true);
         };
       } else {

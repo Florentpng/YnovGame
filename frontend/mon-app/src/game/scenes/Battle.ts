@@ -4,17 +4,12 @@ import { GameState, type PokemonInstance } from '../state/GameState';
 import { getSpecies } from '../data/species';
 import { getMove } from '../data/moves';
 import { calculateDamage } from '../combat/damage';
-import { tryCapture } from '../combat/capture';
 
 export interface BattleInitData {
     kind: 'wild' | 'trainer';
     enemyTeamSpeciesIds: string[];
     trainerId?: string;
 }
-
-const TYPE_COLORS: Record<string, number> = {
-    fire: 0xd35400, water: 0x2980b9, grass: 0x27ae60,
-};
 
 export class Battle extends Scene {
     private initData!: BattleInitData;
@@ -23,7 +18,6 @@ export class Battle extends Scene {
     private playerActive = 0;
     private enemyActive = 0;
     private menuGroup!: Phaser.GameObjects.Group;
-    // @ts-expect-error Field will be read by future tasks
     private menuMode: 'main' | 'attack' | 'pokemon' | 'locked' = 'locked';
     private navButtons: Array<{
         bg: Phaser.GameObjects.Rectangle;
@@ -34,7 +28,6 @@ export class Battle extends Scene {
     private navIndex = 0;
     private escAction: (() => void) | null = null;
 
-    // MODIFICATION : Utilisation de Phaser.GameObjects.Sprite à la place de Rectangle
     private playerSprite!: Phaser.GameObjects.Sprite;
     private enemySprite!: Phaser.GameObjects.Sprite;
     
@@ -42,6 +35,8 @@ export class Battle extends Scene {
     private enemyHpText!: Phaser.GameObjects.Text;
     private playerHpBar!: Phaser.GameObjects.Rectangle;
     private enemyHpBar!: Phaser.GameObjects.Rectangle;
+    private playerNameText!: Phaser.GameObjects.Text;
+    private enemyNameText!: Phaser.GameObjects.Text;
     private textBox!: Phaser.GameObjects.Text;
 
     constructor() { super('Battle'); }
@@ -49,7 +44,6 @@ export class Battle extends Scene {
     init(data: BattleInitData) {
         this.initData = data;
         
-        // Récupération immédiate des équipes pour le preload
         this.playerTeam = GameState.playerTeam;
         this.enemyTeam = this.initData.enemyTeamSpeciesIds.map((id) => {
             const sp = getSpecies(id);
@@ -104,7 +98,7 @@ export class Battle extends Scene {
         const infoX = 220;
         const infoY = 180;
     
-        this.add.text(infoX, infoY, sp.name, {
+        this.enemyNameText = this.add.text(infoX, infoY, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         });
         
@@ -131,7 +125,7 @@ export class Battle extends Scene {
         const infoX = 620;
         const infoY = 470;
 
-        this.add.text(infoX, infoY, sp.name, {
+        this.playerNameText = this.add.text(infoX, infoY, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         });
 
@@ -171,7 +165,6 @@ export class Battle extends Scene {
         const isWild = this.initData.kind === 'wild';
         this.makeMenuButton(280, 660, 'Attaquer', () => this.showAttackMenu());
         this.makeMenuButton(480, 660, 'Pokémon', () => this.showPokemonMenu());
-        this.makeMenuButton(680, 660, 'Ball',     () => this.playerThrowBall(), !isWild);
         this.makeMenuButton(880, 660, 'Fuir',     () => this.playerFlee(), !isWild);
         this.setText('Que faire ?');
         this.escAction = null;
@@ -307,7 +300,8 @@ export class Battle extends Scene {
             const mon = this.playerTeam[idx];
             const sp = getSpecies(mon.speciesId);
             const label = `${sp.name} ${mon.currentHp}/${mon.maxHp}`;
-            this.makeMenuButton(280 + i * 200, 660, label, () => this.forcedSwitch(idx));
+
+            this.makeMenuButton(520 + i * 220, 660, label, () => this.forcedSwitch(idx));
         });
         this.escAction = null;
     }
@@ -326,15 +320,12 @@ export class Battle extends Scene {
         const e = this.enemyTeam[this.enemyActive];
         const sp = getSpecies(e.speciesId);
         
-        // MODIFICATION : Changement de texture pour le nouveau Pokémon adverse envoyé
         this.enemySprite.setTexture(e.speciesId);
-        
         this.enemyHpBar.setScale(1, 1);
         this.refreshEnemyHp();
-        this.add.rectangle(620, 140, 240, 28, 0x202030).setOrigin(0, 0);
-        this.add.text(620, 140, sp.name, {
-            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
-        });
+        
+        // On supprime les vieux rectangles et on met juste à jour le nom !
+        this.enemyNameText.setText(sp.name);
     }
 
     private playerSwitch(index: number) {
@@ -351,14 +342,11 @@ export class Battle extends Scene {
         const p = this.playerTeam[this.playerActive];
         const sp = getSpecies(p.speciesId);
         
-        // MODIFICATION : Changement de texture pour le nouveau Pokémon joueur envoyé
         this.playerSprite.setTexture(p.speciesId);
-        
         this.refreshPlayerHp();
-        this.add.rectangle(360, 420, 240, 28, 0x202030);
-        this.add.text(360, 420, sp.name, {
-            fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
-        }).setOrigin(0.5, 0);
+
+        // On supprime les vieux rectangles et on met juste à jour le nom !
+        this.playerNameText.setText(sp.name);
     }
 
     // MODIFICATION : Changement de type vers Phaser.GameObjects.Sprite + Clignotement via "Tint"
@@ -384,53 +372,6 @@ export class Battle extends Scene {
         this.tweens.add({ targets: this.playerHpBar, scaleX: ratio, duration: 300 });
         this.playerHpBar.setOrigin(0, 0.5);
         this.playerHpText.setText(`${p.currentHp} / ${p.maxHp}`);
-    }
-
-    private playerThrowBall() {
-        this.menuMode = 'locked';
-        this.clearMenu();
-        const wild = this.enemyTeam[0];
-        const sp = getSpecies(wild.speciesId);
-        this.setText(`Tu lances une Ball sur ${sp.name} !`);
-
-        const ball = this.add.circle(256, 480, 12, 0xffffff).setStrokeStyle(2, 0xff0000);
-        this.tweens.add({
-            targets: ball,
-            x: 768, y: 220,
-            duration: 500,
-            onComplete: () => {
-                this.tweens.add({
-                    targets: ball, angle: 360, duration: 600, repeat: 2,
-                    onComplete: () => {
-                        ball.destroy();
-                        const caught = tryCapture(wild.currentHp, wild.maxHp);
-                        if (caught) this.onCaptureSuccess();
-                        else this.onCaptureFail();
-                    },
-                });
-            },
-        });
-    }
-
-    private onCaptureSuccess() {
-        const wild = this.enemyTeam[0];
-        const sp = getSpecies(wild.speciesId);
-        if (GameState.playerTeam.length >= 3) {
-            this.setText(`Tu as déjà 3 Pokémon. ${sp.name} est relâché.`);
-        } else {
-            GameState.addToTeam({
-                speciesId: wild.speciesId,
-                currentHp: wild.currentHp,
-                maxHp: wild.maxHp,
-            });
-            this.setText(`Capture réussie ! ${sp.name} rejoint l'équipe.`);
-        }
-        this.time.delayedCall(1500, () => this.returnToOverworld());
-    }
-
-    private onCaptureFail() {
-        this.setText(`Zut, ${getSpecies(this.enemyTeam[0].speciesId).name} s'est échappé !`);
-        this.time.delayedCall(1000, () => this.enemyAttack());
     }
 
     private playerFlee() {

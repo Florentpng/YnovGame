@@ -1,18 +1,6 @@
 import { Scene, GameObjects } from 'phaser';
 import { EventBus } from '../EventBus';
 import { GameState } from '../state/GameState';
-import costaricaUrl from '../../assets/costarica.png';
-import crombelebiUrl from '../../assets/crombelebi.png';
-import eliegateurUrl from '../../assets/eliegateur.png';
-import grolumiereUrl from '../../assets/grolumiere.png';
-import johnyonUrl from '../../assets/johnyon.png';
-import lapauroreUrl from '../../assets/lapaurore.png';
-import lucatataUrl from '../../assets/lucatata.png';
-import matterioUrl from '../../assets/matterio.png';
-import mousteaUrl from '../../assets/moustea.png';
-import ramochetUrl from '../../assets/Ramochet.png';
-import thivaltoutUrl from '../../assets/thivaltout.png';
-import triocundoUrl from '../../assets/triocundo.png';
 import { getSpecies } from '../data/species';
 
 export class StarterSelect extends Scene {
@@ -32,19 +20,25 @@ export class StarterSelect extends Scene {
 
     constructor() { super('StarterSelect'); }
 
+    init() {
+        this.selectedTeam = [];
+        this.slots = [];
+        this.cardsBg.clear();
+    }
+
     preload() {
-        this.load.image('costarica', costaricaUrl);
-        this.load.image('crombelebi', crombelebiUrl);
-        this.load.image('eliegateur', eliegateurUrl);
-        this.load.image('grolumiere', grolumiereUrl);
-        this.load.image('johnyon', johnyonUrl);
-        this.load.image('lapaurore', lapauroreUrl);
-        this.load.image('lucatata', lucatataUrl);
-        this.load.image('matterio', matterioUrl);
-        this.load.image('moustea', mousteaUrl);
-        this.load.image('Ramochet', ramochetUrl);
-        this.load.image('thivaltout', thivaltoutUrl);
-        this.load.image('triocundo', triocundoUrl);
+        this.load.image('costarica', '/costarica.png');
+        this.load.image('crombelebi', '/crombelebi.png');
+        this.load.image('eliegateur', '/eliegateur.png');
+        this.load.image('grolumiere', '/grolumiere.png');
+        this.load.image('johnyon', '/johnyon.png');
+        this.load.image('lapaurore', '/lapaurore.png');
+        this.load.image('lucatata', '/lucatata.png');
+        this.load.image('matterio', '/matterio.png');
+        this.load.image('moustea', '/moustea.png');
+        this.load.image('Ramochet', '/ramochet.png');
+        this.load.image('thivaltout', '/thivaltout.png');
+        this.load.image('triocundo', '/triocundo.png');
     }
 
     create() {
@@ -137,13 +131,9 @@ export class StarterSelect extends Scene {
         this.confirmButton.on('pointerdown', () => {
             if (this.selectedTeam.length === 3) {
                 
-                // 1. On vide l'équipe précédente au cas où
                 GameState.reset();
 
-                // 2. On ajoute chaque Pokémon sélectionné dans le GameState
                 this.selectedTeam.forEach(monsterKey => {
-                    // Attention: on s'assure de passer la clé en minuscules si besoin 
-                    // pour correspondre exactement à l'ID dans data/species.ts (ex: 'ramochet')
                     const speciesId = monsterKey.toLowerCase(); 
                     const sp = getSpecies(speciesId);
                     
@@ -154,7 +144,6 @@ export class StarterSelect extends Scene {
                     });
                 });
 
-                // 3. On passe à la scène suivante !
                 this.scene.start('Overworld'); 
             }
         });
