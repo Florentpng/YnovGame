@@ -23,6 +23,7 @@ export class Preloader extends Scene
 
     preload ()
     {
+        this.load.image('water_sprite', 'water.png');
         this.load.image('tall_grass_sprite', 'tall_grass.png');
         this.load.image('tree_sprite', 'tree.png');
         this.load.image('team_rocket_avatar', 'team_rocket.png');

@@ -51,6 +51,9 @@ export class Overworld extends Scene {
                         
                         const grass = this.add.sprite(px, py, 'tall_grass_sprite');
                         grass.setDisplaySize(TILE_SIZE, TILE_SIZE);
+                    } else if (tileType === 'water') {
+                        const water = this.add.sprite(px, py, 'water_sprite');
+                        water.setDisplaySize(TILE_SIZE, TILE_SIZE);
                     }
                     else {
                         // Pour toutes les autres tuiles normales (path, water, tall_grass...)
@@ -123,10 +126,10 @@ export class Overworld extends Scene {
     private checkEncounters(x: number, y: number) {
 
         // ---- RENCONTRE SPÉCIALE ----
-        if (x === 5 && y === 8) {
+        if (x === 18 && y === 2) {
             this.startBattle({
                 kind: 'wild',
-                enemyTeamSpeciesIds: ['rimochet'],
+                enemyTeamSpeciesIds: ['grolumiere'],
             });
             return;
         }
