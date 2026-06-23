@@ -187,14 +187,11 @@ function App() {
             }}
           ></a>
         </section>
-      ) : (
-        <div id="app" style={{ display: "flex" }}>
-          <PhaserGame ref={phaserRef} currentActiveScene={() => {}} />
-          <aside style={{ width: 240, background: "Black", minHeight: 768 }}>
-            <TeamPanel />
-          </aside>
-        </div>
-      )}
+          ) : (
+            <div id="app" style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100vh", backgroundColor: "#000" }}>
+              <PhaserGame ref={phaserRef} currentActiveScene={() => {}} />
+            </div>
+          )}
     </>
   );
 }
