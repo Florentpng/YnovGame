@@ -1,30 +1,72 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
+import loginBackgroundUrl from '../../assets/login_background.png';
 
 export class MainMenu extends Scene {
     constructor() { super('MainMenu'); }
 
+    preload() {
+        this.load.image('login-background', loginBackgroundUrl);
+    }
+
     create() {
-        this.add.text(512, 240, 'Pokémon-like', {
-            fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
+        const { width, height } = this.scale;
+
+        const bg = this.add.image(width / 2, height / 2, 'login-background').setOrigin(0.5);
+        bg.setDisplaySize(width, height);
+
+        const title = this.add.text(width / 2, height / 4, 'POKYNOV', {
+            fontFamily: '"Press Start 2P", Impact, sans-serif',
+            fontSize: '64px',
+            color: '#FFCC00',
+            stroke: '#2A52BE',
+            strokeThickness: 12,
+            shadow: { offsetX: 6, offsetY: 6, color: '#000000', fill: true }
         }).setOrigin(0.5);
 
-        this.add.text(512, 340, '(prototype)', {
-            fontFamily: 'Arial', fontSize: 20, color: '#cccccc',
-        }).setOrigin(0.5);
+        this.tweens.add({
+            targets: title,
+            y: title.y - 15,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
 
-        const button = this.add.text(512, 480, 'Démarrer', {
-            fontFamily: 'Arial Black', fontSize: 36, color: '#ffffff',
-            backgroundColor: '#0066cc', padding: { x: 24, y: 12 },
+        const startText = this.add.text(width / 2, height - 120, '▶ DÉMARRER ◀', {
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: '24px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6,
+            shadow: { offsetX: 3, offsetY: 3, color: '#000000', fill: true }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-        button.on('pointerover', () => button.setBackgroundColor('#0088ff'));
-        button.on('pointerout', () => button.setBackgroundColor('#0066cc'));
-        button.on('pointerdown', () => this.scene.start('StarterSelect'));
+        const blinkTween = this.tweens.add({
+            targets: startText,
+            alpha: 0.2,
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Linear'
+        });
 
-        this.input.keyboard?.once('keydown-ENTER', () => this.scene.start('StarterSelect'));
-        this.input.keyboard?.once('keydown-SPACE', () => this.scene.start('StarterSelect'));
+        startText.on('pointerover', () => {
+            startText.setColor('#FFCC00');
+            blinkTween.pause();            
+            startText.setAlpha(1);         
+        });
+        
+        startText.on('pointerout', () => {
+            startText.setColor('#ffffff');
+            blinkTween.resume();           
+        });
+
+        const changeScene = () => this.scene.start('StarterSelect');
+        
+        startText.on('pointerdown', changeScene);
+        this.input.keyboard?.once('keydown-ENTER', changeScene);
+        this.input.keyboard?.once('keydown-SPACE', changeScene);
 
         EventBus.emit('current-scene-ready', this);
     }
