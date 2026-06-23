@@ -1,16 +1,10 @@
 import type { TileType } from '../types';
 import type { SpeciesId } from '../species';
 
-// Legend:
-//   . = path
-//   g = tall_grass
-//   , = short_grass
-//   T = tree
-//   ~ = water
 const RAW = [
     'TTTTTTTTTTTTTTTTTTTT', // row 0
     'T,,,,,gggg,,,,,,,,,T',
-    'T,,,,,gggg,,,,,,,,,T',
+    'T,,,,,gggg,,,,,,,,0T',
     'T,,,,,,,,,,,,,,,,,,T',
     'T,,..............,,T',
     'T,,.,,,,,,,,,,,,.,,T',
@@ -31,6 +25,7 @@ const CODE_TO_TILE: Record<string, TileType> = {
     ',': 'short_grass',
     'T': 'tree',
     '~': 'water',
+    '0': 'legendary_spawn',
 };
 
 export const MAIN_MAP: TileType[][] = RAW.map((row) =>
@@ -52,7 +47,7 @@ export interface TrainerPlacement {
 }
 
 export const TRAINERS: TrainerPlacement[] = [
-    { id: 'trainer_a', x: 8,  y: 4,  teamSpeciesIds: ['eliegateur', 'lucatata', 'thivolt'] },
-    { id: 'trainer_b', x: 4,  y: 8,  teamSpeciesIds: ['facundor',   'matteon',  'eleamite'] },
-    { id: 'trainer_c', x: 14, y: 12, teamSpeciesIds: ['aurorise',   'johnyx',   'richettin'] },
+    { id: 'trainer_a', x: 8,  y: 4,  teamSpeciesIds: ['eliegateur', 'lucatata', 'thivaltout'] },
+    { id: 'trainer_b', x: 4,  y: 8,  teamSpeciesIds: ['triocundo',   'matterio',  'moustea'] },
+    { id: 'trainer_c', x: 14, y: 12, teamSpeciesIds: ['lapaurore',   'johnyon',   'ramochet'] },
 ];

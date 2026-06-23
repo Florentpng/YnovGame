@@ -18,7 +18,7 @@ export function tilePixelCenter(tx: number, ty: number): { x: number; y: number 
 }
 
 export class Overworld extends Scene {
-    private player!: Phaser.GameObjects.Rectangle;
+    private player!: Phaser.GameObjects.Sprite;
     private isMoving = false;
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private wasd!: { up: Phaser.Input.Keyboard.Key; down: Phaser.Input.Keyboard.Key; left: Phaser.Input.Keyboard.Key; right: Phaser.Input.Keyboard.Key };
@@ -35,21 +35,43 @@ export class Overworld extends Scene {
         this.add.rectangle(512, 384, MAP_WIDTH * TILE_SIZE + 8, MAP_HEIGHT * TILE_SIZE + 8, 0x000000)
             .setStrokeStyle(2, 0xffffff);
 
-        for (let y = 0; y < MAP_HEIGHT; y++) {
-            for (let x = 0; x < MAP_WIDTH; x++) {
-                const { x: px, y: py } = tilePixelCenter(x, y);
-                this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, TILE_COLORS[MAIN_MAP[y][x]]);
+            // On parcourt la carte ligne par ligne, case par case
+            for (let y = 0; y < MAP_HEIGHT; y++) {
+                for (let x = 0; x < MAP_WIDTH; x++) {
+                    const { x: px, y: py } = tilePixelCenter(x, y);
+                    const tileType = MAIN_MAP[y][x];
+            
+                    if (tileType === 'tree') {
+                        this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, TILE_COLORS['short_grass']);
+                        
+                        const tree = this.add.sprite(px, py, 'tree_sprite');
+                        tree.setDisplaySize(TILE_SIZE, TILE_SIZE);
+                    } else if (tileType === 'tall_grass') {
+                        this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, TILE_COLORS['short_grass']);
+                        
+                        const grass = this.add.sprite(px, py, 'tall_grass_sprite');
+                        grass.setDisplaySize(TILE_SIZE, TILE_SIZE);
+                    }
+                    else {
+                        // Pour toutes les autres tuiles normales (path, water, tall_grass...)
+                        this.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, TILE_COLORS[tileType]);
+                    }
+                }
             }
-        }
 
         for (const t of TRAINERS) {
             if (GameState.defeatedTrainerIds.has(t.id)) continue;
             const { x: px, y: py } = tilePixelCenter(t.x, t.y);
-            this.add.rectangle(px, py, 26, 26, 0xff3030).setStrokeStyle(2, 0xffffff);
+            
+            const trainerSprite = this.add.sprite(px, py, 'team_rocket_avatar');
+            
+            trainerSprite.setDisplaySize(28, 28);
         }
 
         const pos = tilePixelCenter(GameState.playerPosition.x, GameState.playerPosition.y);
-        this.player = this.add.rectangle(pos.x, pos.y, 28, 28, 0x4080ff).setStrokeStyle(2, 0xffffff);
+        this.player = this.add.sprite(pos.x, pos.y, 'player_avatar');
+
+        this.player.setDisplaySize(28, 28);
 
         this.cursors = this.input.keyboard!.createCursorKeys();
         this.wasd = {
@@ -99,7 +121,17 @@ export class Overworld extends Scene {
     }
 
     private checkEncounters(x: number, y: number) {
-        // 1. Trainer adjacency (deterministic, priority)
+
+        // ---- RENCONTRE SPÉCIALE ----
+        if (x === 5 && y === 8) {
+            this.startBattle({
+                kind: 'wild',
+                enemyTeamSpeciesIds: ['rimochet'],
+            });
+            return;
+        }
+
+        // 1. Détection des dresseurs adjacents
         const adj = [
             { x: x + 1, y },
             { x: x - 1, y },
@@ -109,16 +141,18 @@ export class Overworld extends Scene {
         for (const a of adj) {
             const t = this.trainerAt(a.x, a.y);
             if (t) {
+                // MODIFICATION : On s'assure d'envoyer la bonne structure attendue par Battle.ts
                 this.startBattle({
                     kind: 'trainer',
-                    enemyTeamSpeciesIds: t.teamSpeciesIds,
+                    // Si ton Battle.ts attend une liste d'IDs sous un autre nom, ajuste ici :
+                    enemyTeamSpeciesIds: t.teamSpeciesIds, 
                     trainerId: t.id,
                 });
                 return;
             }
         }
-
-        // 2. Wild encounter (random, only on tall grass)
+    
+        // 2. Rencontre sauvage (herbe)
         if (MAIN_MAP[y][x] === 'tall_grass' && Math.random() < 0.1) {
             const speciesId = WILD_IDS[Math.floor(Math.random() * WILD_IDS.length)];
             this.startBattle({

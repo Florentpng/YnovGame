@@ -10,7 +10,6 @@ export class Preloader extends Scene
 
     init ()
     {
-        // On affiche le background chargé dans la Boot Scene
         this.add.image(512, 384, 'background');
 
         // Barre de progression
@@ -24,21 +23,23 @@ export class Preloader extends Scene
 
     preload ()
     {
+        this.load.image('tall_grass_sprite', 'tall_grass.png');
+        this.load.image('tree_sprite', 'tree.png');
+        this.load.image('team_rocket_avatar', 'team_rocket.png');
+        this.load.image('player_avatar', 'avatar.png');
         this.load.image('battle_background', 'battle_bg.jpg');
-        this.load.image('background', 'login_background.png'); // Si ton fond s'appelle comme ça maintenant
+        this.load.image('background', 'login_background.png');
         this.load.image('logo', 'logo.png');
         this.load.image('star', 'star.png');
 
-        // Boucle sur les clés de SPECIES ("moustea", "ramochet", etc.)
         for (const speciesId of Object.keys(SPECIES)) {
-            // Puisque setPath est enlevé, Phaser va chercher directement : "/moustea.png"
+
             this.load.image(speciesId, `${speciesId}.png`);
         }
     }
 
     create ()
     {
-        // Une fois TOUT chargé (interface + Pokémon), on lance le menu principal
         this.scene.start('MainMenu');
     }
 }
