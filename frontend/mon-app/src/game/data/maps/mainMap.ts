@@ -4,7 +4,7 @@ import type { SpeciesId } from '../species';
 const RAW = [
     'TTTTTTTTTTTTTTTTTTTT', // row 0
     'T,,,,,gggg,,,,,,,,,T',
-    'T,,,,,gggg,,,,,,,,0T',
+    'T,,,,,gggg,,,,,,,,,T',
     'T,,,,,,,,,,,,,,,,,,T',
     'T,,..............,,T',
     'T,,.,,,,,,,,,,,,.,,T',

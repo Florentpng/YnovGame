@@ -52,6 +52,13 @@ export class Battle extends Scene {
     }
 
     create() {
+
+        if (this.initData.kind === 'trainer' && this.initData.trainerId) {
+            this.sound.play('trainer_music', { loop: true, volume: 0.5 });
+        } else {
+            this.sound.play('wild_music', { loop: true, volume: 0.5 });
+        }
+
         // 1. On affiche l'image de fond en premier (centrée au milieu de l'écran : 512, 300)
         const background = this.add.image(512, 315, 'battle_background');
         
@@ -286,6 +293,7 @@ export class Battle extends Scene {
             .filter((i) => i !== -1);
         if (aliveIndices.length === 0) {
             this.setText('Toute ton équipe est K.O...');
+            this.sound.stopAll();
             this.time.delayedCall(1500, () => this.scene.start('GameOver'));
             return;
         }
@@ -382,6 +390,7 @@ export class Battle extends Scene {
     }
 
     private returnToOverworld() {
+        this.sound.stopAll();
         this.scene.start('Overworld');
     }
 

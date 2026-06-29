@@ -145,6 +145,7 @@ export class StarterSelect extends Scene {
                 });
 
                 this.scene.start('Overworld'); 
+                this.sound.stopAll();
             }
         });
 

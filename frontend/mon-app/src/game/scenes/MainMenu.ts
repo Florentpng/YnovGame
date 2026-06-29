@@ -12,6 +12,8 @@ export class MainMenu extends Scene {
     create() {
         const { width, height } = this.scale;
 
+        this.sound.play('mainmenu_music', { loop: true, volume: 0.5 });
+
         const bg = this.add.image(width / 2, height / 2, 'login-background').setOrigin(0.5);
         bg.setDisplaySize(width, height);
 
@@ -62,7 +64,9 @@ export class MainMenu extends Scene {
             blinkTween.resume();           
         });
 
-        const changeScene = () => this.scene.start('StarterSelect');
+        const changeScene = () => {
+            this.scene.start('StarterSelect');
+        }
         
         startText.on('pointerdown', changeScene);
         this.input.keyboard?.once('keydown-ENTER', changeScene);
