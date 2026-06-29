@@ -74,7 +74,7 @@ export const MOVES: Record<MoveId, MoveDef> = {
     id: "monster_sucre",
     name: "Monster Sucré",
     type: "tenebres",
-    power: 15,
+    power: 50,
   },
   rose: { id: "rose", name: "Rosé", type: "poison", power: 8 },
   duper: { id: "duper", name: "Duper", type: "poison", power: 10 },

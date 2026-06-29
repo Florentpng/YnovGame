@@ -1,13 +1,8 @@
 import { Scene } from 'phaser';
 import { EventBus } from '../EventBus';
-import loginBackgroundUrl from '../../assets/login_background.png';
 
 export class MainMenu extends Scene {
     constructor() { super('MainMenu'); }
-
-    preload() {
-        this.load.image('login-background', loginBackgroundUrl);
-    }
 
     create() {
         const { width, height } = this.scale;
