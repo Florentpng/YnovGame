@@ -41,34 +41,45 @@ export class Battle extends Scene {
 
     constructor() { super('Battle'); }
 
-    init(data: BattleInitData) {
+    init(data: any) {
         this.initData = data;
-        
+        this.enemyActive = 0;
+        this.playerActive = 0;
+    
         this.playerTeam = GameState.playerTeam;
-        this.enemyTeam = this.initData.enemyTeamSpeciesIds.map((id) => {
-            const sp = getSpecies(id);
-            return { speciesId: id, currentHp: sp.baseHp, maxHp: sp.baseHp };
-        });
+
+        const firstAliveIndex = this.playerTeam.findIndex((pokemon: any) => pokemon.currentHp > 0);
+
+        this.playerActive = firstAliveIndex !== -1 ? firstAliveIndex : 0;
+    
+        if (data.kind === 'wild') {
+            this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => ({
+                speciesId: id,
+                currentHp: 34,
+                maxHp: 34,
+            }));
+        } else {
+            this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => ({
+                speciesId: id,
+                currentHp: 34,
+                maxHp: 34,
+            }));
+        }
     }
 
     create() {
-
         if (this.initData.kind === 'trainer' && this.initData.trainerId) {
             this.sound.play('trainer_music', { loop: true, volume: 0.5 });
         } else {
             this.sound.play('wild_music', { loop: true, volume: 0.5 });
         }
 
-        // 1. On affiche l'image de fond en premier (centrée au milieu de l'écran : 512, 300)
         const background = this.add.image(512, 315, 'battle_background');
         
-        // 2. On force l'image à s'adapter aux dimensions de ton jeu (1004 x 748)
         background.setDisplaySize(1004, 605);
     
-        // 3. On garde juste le contour blanc (on enlève la couleur opaque 0x202030)
         this.add.rectangle(512, 384, 1004, 748).setStrokeStyle(2, 0xffffff);
     
-        // 4. On dessine tout le reste par-dessus (Pokémon, textes, menus)
         this.makeEnemyArea();
         this.makePlayerArea();
         this.makeTextBox();
@@ -124,25 +135,25 @@ export class Battle extends Scene {
     private makePlayerArea() {
         const p = this.playerTeam[this.playerActive];
         const sp = getSpecies(p.speciesId);
-
+    
         this.playerSprite = this.add.sprite(256, 495, p.speciesId);
-
         this.playerSprite.setDisplaySize(290, 290);
-
+    
         const infoX = 620;
         const infoY = 470;
-
+    
         this.playerNameText = this.add.text(infoX, infoY, sp.name, {
             fontFamily: 'Arial Black', fontSize: 22, color: '#ffffff',
         });
-
-        // Le fond de la jauge
+    
         this.add.rectangle(infoX, infoY + 40, 200, 12, 0x444444).setOrigin(0, 0.5);
-
-        // La jauge verte
-        this.playerHpBar = this.add.rectangle(infoX, infoY + 40, 200, 12, 0x44dd44).setOrigin(0, 0.5);
-
-        // Le texte des PV
+    
+        const hpRatio = p.currentHp / p.maxHp;
+        
+        const currentBarWidth = 200 * hpRatio;
+    
+        this.playerHpBar = this.add.rectangle(infoX, infoY + 40, currentBarWidth, 12, 0x44dd44).setOrigin(0, 0.5);
+    
         this.playerHpText = this.add.text(infoX, infoY + 60, `${p.currentHp} / ${p.maxHp}`, {
             fontFamily: 'Arial', fontSize: 14, color: '#ffffff',
         });
@@ -357,7 +368,6 @@ export class Battle extends Scene {
         this.playerNameText.setText(sp.name);
     }
 
-    // MODIFICATION : Changement de type vers Phaser.GameObjects.Sprite + Clignotement via "Tint"
     private flashAndDamage(sprite: Phaser.GameObjects.Sprite, after: () => void) {
         sprite.setTint(0xff4040); // Teinte rouge de dégâts
         this.time.delayedCall(180, () => {
