@@ -23,6 +23,13 @@ export class Preloader extends Scene
 
     preload ()
     {
+        this.load.audio('overworld_music', 'overworld_theme.mp3');
+        this.load.audio('wild_music', 'wild_theme.mp3');
+        this.load.audio('trainer_music', 'trainer_theme.mp3');
+        this.load.audio('legendary_music', 'legendary_theme.mp3');
+        this.load.audio('mainmenu_music', 'mainmenu_theme.mp3');
+
+        this.load.image('water_sprite', 'water.png');
         this.load.image('tall_grass_sprite', 'tall_grass.png');
         this.load.image('tree_sprite', 'tree.png');
         this.load.image('team_rocket_avatar', 'team_rocket.png');
