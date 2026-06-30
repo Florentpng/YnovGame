@@ -42,7 +42,12 @@ export const MOVES: Record<MoveId, MoveDef> = {
   },
   PL: { id: "PL", name: "PL", type: "normal", power: 5 },
   react: { id: "react", name: "React", type: "electrique", power: 10 },
-  drop_table: { id: "drop_table", name: "DROP Table", type: "electrique", power: 8 },
+  drop_table: {
+    id: "drop_table",
+    name: "DROP Table",
+    type: "electrique",
+    power: 8,
+  },
   absence_injustifiee: {
     id: "absence_injustifiee",
     name: "Absence injustifiée",

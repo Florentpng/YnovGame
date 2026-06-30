@@ -20,15 +20,12 @@ export async function initDb(): Promise<void> {
   const conn = await pool.getConnection();
 
   try {
-
     for (const statement of statements) {
       await conn.execute(statement);
     }
-    
   } catch (err) {
     console.error((err as Error).message);
   } finally {
     conn.release();
-    // process.exit();
   }
 }

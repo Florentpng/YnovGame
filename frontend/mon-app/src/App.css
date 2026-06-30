@@ -250,7 +250,7 @@
 }
 
 .retro-input:focus {
-  border-color: #000; /* Le contour devient noir quand on écrit */
+  border-color: #000;
 }
 
 .retro-button-container {
@@ -265,7 +265,7 @@
 .retro-submit-btn {
   font-family: 'Press Start 2P', monospace;
   font-size: 14px;
-  background-color: #3b82f6; /* Bleu style Pokémon */
+  background-color: #3b82f6;
   color: #fff;
   border: 3px solid #000;
   padding: 12px 24px;
@@ -275,11 +275,11 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  box-shadow: inset -4px -4px 0px 0px #1d4ed8; /* Ombre pixelisée interne */
+  box-shadow: inset -4px -4px 0px 0px #1d4ed8;
 }
 
 .retro-submit-btn:active {
-  box-shadow: inset 4px 4px 0px 0px #1d4ed8; /* Effet de clic enfoncé */
+  box-shadow: inset 4px 4px 0px 0px #1d4ed8;
 }
 
 .retro-arrow {
@@ -287,7 +287,6 @@
   animation: retroBlink 0.8s infinite;
 }
 
-/* Bouton secondaire pour changer de mode */
 .retro-switch-btn {
   background: none;
   border: none;

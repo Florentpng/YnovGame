@@ -32,7 +32,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
 
         const isMatch = await bcrypt.compare(req.body.password, passwordRows[0].password);
         if (!isMatch) {
-            res.status(401).send({ message: "mdp incorrect" });
+            res.status(401).send({ message: "Mot de passe incorrect" });
             return;
         }
 
