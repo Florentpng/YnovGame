@@ -4,7 +4,7 @@ import type { SpeciesId } from "../species";
 const RAW = [
   "TTTTTTTTTTTTTTTTTTTT", // row 0
   "T,,,,,gggg,,,,,,,,,T",
-  "T,,,,,gggg,,,,,,,,,T",
+  "T,,,,,gggg,,,,,,,,0T",
   "T,,,,,,,,,,,,,,,,,,T",
   "T,,..............,,T",
   "T,,.,,,,,,,,,,,,.,,T",
@@ -25,7 +25,7 @@ const CODE_TO_TILE: Record<string, TileType> = {
   ",": "short_grass",
   T: "tree",
   "~": "water",
-  "0": "legendary_spawn", // Non utilisé
+  "0": "hole",
 };
 
 export const MAIN_MAP: TileType[][] = RAW.map((row) =>

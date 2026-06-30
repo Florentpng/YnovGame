@@ -18,7 +18,7 @@ export type TileType =
   | "short_grass"
   | "tree"
   | "water"
-  | "legendary_spawn";
+  | "hole";
 
 export const TILE_COLORS: Record<TileType, number> = {
   path: 0xc8b88a,
@@ -26,7 +26,7 @@ export const TILE_COLORS: Record<TileType, number> = {
   short_grass: 0x6abf4b,
   tree: 0x1a3a1a,
   water: 0x3a7fbf,
-  legendary_spawn: 0xffd700,
+  hole: 0x8b4514,
 };
 
 export const WALKABLE: Record<TileType, boolean> = {
@@ -35,5 +35,5 @@ export const WALKABLE: Record<TileType, boolean> = {
   short_grass: true,
   tree: false,
   water: false,
-  legendary_spawn: true,
+  hole: true,
 };
