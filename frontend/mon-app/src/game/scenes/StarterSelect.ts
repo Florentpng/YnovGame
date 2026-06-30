@@ -11,7 +11,6 @@ export class StarterSelect extends Scene {
     "costarica",
     "crombelebi",
     "eliegateur",
-    "grolumiere",
     "johnyon",
     "lapaurore",
     "lucatata",

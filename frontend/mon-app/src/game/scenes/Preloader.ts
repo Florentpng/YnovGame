@@ -16,12 +16,16 @@ export class Preloader extends Scene {
   }
 
   preload() {
+    this.load.audio("lucas_sound", "lucas.mp3");
+    this.load.audio("fah_sound", "fah.mp3");
+    this.load.audio("flashbang_sound", "flashbang.mp3");
     this.load.audio("overworld_music", "overworld_theme.mp3");
     this.load.audio("wild_music", "wild_theme.mp3");
     this.load.audio("trainer_music", "trainer_theme.mp3");
     this.load.audio("legendary_music", "legendary_theme.mp3");
     this.load.audio("mainmenu_music", "mainmenu_theme.mp3");
 
+    this.load.image("hole_sprite", "hole.png");
     this.load.image("login-background", "login_background.png");
     this.load.image("water_sprite", "water.png");
     this.load.image("tall_grass_sprite", "tall_grass.png");

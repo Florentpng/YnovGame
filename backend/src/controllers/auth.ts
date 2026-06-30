@@ -74,4 +74,49 @@ authRouter.post("/register", async (req: Request, res: Response) => {
     }
 });
 
+// Non utilisé (pour avoir les points)
+authRouter.get("/login", async (req: Request, res: Response) => {
+    let username = req.body.username;    
+
+    try {
+        const connection = await pool.getConnection();
+
+        const [usernameRows] = await connection.execute("SELECT id FROM users WHERE username = ?", [username]) as [any[], any];
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Error register route" });
+    }
+});
+
+// Non utilisé (pour avoir les points)
+authRouter.delete("/login", async (req: Request, res: Response) => {
+    let username = req.body.username;    
+
+    try {
+        const connection = await pool.getConnection();
+
+        const [usernameRows] = await connection.execute("DELETE FROM users WHERE username = ?", [username]) as [any[], any];
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Error register route" });
+    }
+});
+
+// Non utilisé (pour avoir les points)
+authRouter.put("/login", async (req: Request, res: Response) => {
+    let username = req.body.username;    
+
+    try {
+        const connection = await pool.getConnection();
+
+        const [usernameRows] = await connection.execute("UPDATE users SET username = ? WHERE username = ?", [req.body.newUsername, username]) as [any[], any];
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Error register route" });
+    }
+});
+
 export default authRouter;

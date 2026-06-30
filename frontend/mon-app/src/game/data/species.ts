@@ -23,6 +23,7 @@ export interface SpeciesDef {
   baseHp: number;
   baseAtk: number;
   moveIds: MoveId[];
+  isLegendary?: boolean;
 }
 
 export const SPECIES: Record<SpeciesId, SpeciesDef> = {
@@ -34,6 +35,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 30,
     baseAtk: 12,
     moveIds: ["discord", "monster_sucre"],
+    isLegendary: false,
   },
   lucatata: {
     id: "2",
@@ -43,6 +45,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 2,
     baseAtk: 1,
     moveIds: ["tier_temps", "PL"],
+    isLegendary: false,
   },
   thivaltout: {
     id: "3",
@@ -52,6 +55,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 34,
     baseAtk: 9,
     moveIds: ["rose", "duper"],
+    isLegendary: false,
   },
   triocundo: {
     id: "4",
@@ -61,6 +65,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 25,
     baseAtk: 11,
     moveIds: ["coup_d_boul", "raouleguibele"],
+    isLegendary: false,
   },
   matterio: {
     id: "5",
@@ -70,6 +75,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 27,
     baseAtk: 9,
     moveIds: ["jab", "jiu_jitsu"],
+    isLegendary: false,
   },
   moustea: {
     id: "6",
@@ -79,6 +85,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 28,
     baseAtk: 8,
     moveIds: ["zero", "stage"],
+    isLegendary: false,
   },
   costarica: {
     id: "7",
@@ -88,6 +95,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 22,
     baseAtk: 10,
     moveIds: ["emploi_fictif", "mastere_cyber"],
+    isLegendary: false,
   },
   lapaurore: {
     id: "8",
@@ -97,6 +105,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 24,
     baseAtk: 8,
     moveIds: ["absence_injustifiee", "convocation"],
+    isLegendary: false,
   },
   johnyon: {
     id: "9",
@@ -106,6 +115,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 20,
     baseAtk: 9,
     moveIds: ["drop_table", "react"],
+    isLegendary: false,
   },
   ramochet: {
     id: "10",
@@ -115,6 +125,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 21,
     baseAtk: 7,
     moveIds: ["disparition", "pause"],
+    isLegendary: false,
   },
   crombelebi: {
     id: "11",
@@ -124,23 +135,30 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
     baseHp: 23,
     baseAtk: 6,
     moveIds: ["these", "antithese"],
+    isLegendary: false,
   },
   grolumiere: {
     id: "12",
     name: "Grolumiere",
     imageUrl: "/grolumiere.png",
     type: "psy",
-    baseHp: 23,
+    baseHp: 40,
     baseAtk: 6,
     moveIds: ["esquive", "IA"],
+    isLegendary: true,
   },
 };
 
 const ALL_SPECIES_IDS = Object.keys(SPECIES) as SpeciesId[];
-const shuffledIds = [...ALL_SPECIES_IDS].sort(() => Math.random() - 0.5);
 
-export const STARTER_IDS: SpeciesId[] = shuffledIds.slice(0, 6);
-export const WILD_IDS: SpeciesId[] = shuffledIds.slice(6);
+export const LEGENDARY_IDS = ALL_SPECIES_IDS.filter(id => SPECIES[id].isLegendary === true);
+
+const ONLY_NORMAL_POKEMON = ALL_SPECIES_IDS.filter(id => !SPECIES[id].isLegendary);
+
+const shuffledNormalIds = [...ONLY_NORMAL_POKEMON].sort(() => Math.random() - 0.5);
+
+export const STARTER_IDS: SpeciesId[] = shuffledNormalIds;
+export const WILD_IDS: SpeciesId[] = shuffledNormalIds;
 
 export function getSpecies(id: SpeciesId | string): SpeciesDef {
   const s = SPECIES[id as SpeciesId];

@@ -87,6 +87,17 @@ export class Overworld extends Scene {
         } else if (tileType === "water") {
           const water = this.add.sprite(px, py, "water_sprite");
           water.setDisplaySize(TILE_SIZE, TILE_SIZE);
+        } else if (tileType === "hole") {
+          this.add.rectangle(
+            px,
+            py,
+            TILE_SIZE,
+            TILE_SIZE,
+            TILE_COLORS["short_grass"],
+          );
+          
+          const hole = this.add.sprite(px, py, "hole_sprite");
+          hole.setDisplaySize(TILE_SIZE + 25, TILE_SIZE);
         } else {
           this.add.rectangle(
             px,
@@ -169,13 +180,38 @@ export class Overworld extends Scene {
 
   private checkEncounters(x: number, y: number) {
     // ---- RENCONTRE SPÉCIALE ----
-    // if (x === 18 && y === 2) {
-    //   this.startBattle({
-    //     kind: "wild",
-    //     enemyTeamSpeciesIds: ["grolumiere"],
-    //   });
-    //   return;
-    // }
+    if (x === 18 && y === 2) {
+      this.sound.stopAll();
+    
+      setTimeout(() => {
+        this.sound.play('fah_sound');
+      }, 500);
+    
+      setTimeout(() => {
+        this.sound.play('flashbang_sound');
+        
+        setTimeout(() => {
+        this.cameras.main.flash(1000, 255, 255, 255);
+        }, 2000);
+      }, 1000);
+    
+      setTimeout(() => {
+        this.cameras.main.fadeOut(3000, 0, 0, 0);
+      }, 4500); 
+    
+      // ---- LANCEMENT DU COMBAT ----
+      setTimeout(() => {
+        this.sound.stopAll();
+        this.sound.play("legendary_music", { loop: true, volume: 0.5 });
+
+        this.startBattle({
+          kind: "wild",
+          enemyTeamSpeciesIds: ["grolumiere"],
+        });
+      }, 5500);
+    
+      return;
+    }
 
     const adj = [
       { x: x + 1, y },
@@ -194,6 +230,8 @@ export class Overworld extends Scene {
 
         this.sound.stopAll();
 
+        this.sound.play("trainer_music", { loop: true, volume: 0.5 });
+
         this.scene.start("Battle", {
           kind: "trainer",
           enemyTeamSpeciesIds: randomTrainerTeam,
@@ -205,6 +243,11 @@ export class Overworld extends Scene {
 
     if (MAIN_MAP[y][x] === "tall_grass" && Math.random() < 0.1) {
       const speciesId = WILD_IDS[Math.floor(Math.random() * WILD_IDS.length)];
+
+      this.sound.stopAll();
+
+      this.sound.play("wild_music", { loop: true, volume: 0.5 });
+
       this.startBattle({
         kind: "wild",
         enemyTeamSpeciesIds: [speciesId],
@@ -213,7 +256,6 @@ export class Overworld extends Scene {
   }
 
   private startBattle(data: BattleInitData) {
-    this.sound.stopAll();
     this.scene.start("Battle", data);
   }
 }

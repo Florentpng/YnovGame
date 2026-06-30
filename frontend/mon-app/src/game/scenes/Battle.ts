@@ -57,27 +57,29 @@ export class Battle extends Scene {
     this.playerActive = firstAliveIndex !== -1 ? firstAliveIndex : 0;
 
     if (data.kind === "wild") {
-      this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => ({
-        speciesId: id,
-        currentHp: 34,
-        maxHp: 34,
-      }));
+      this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => {
+        const species = getSpecies(id); 
+        
+        return {
+          speciesId: id,
+          currentHp: species.baseHp,
+          maxHp: species.baseHp,
+        };
+      });
     } else {
-      this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => ({
-        speciesId: id,
-        currentHp: 34,
-        maxHp: 34,
-      }));
+      this.enemyTeam = data.enemyTeamSpeciesIds.map((id: string) => {
+        const species = getSpecies(id);
+        
+        return {
+          speciesId: id,
+          currentHp: species.baseHp,
+          maxHp: species.baseHp,
+        };
+      });
     }
   }
 
   create() {
-    if (this.initData.kind === "trainer" && this.initData.trainerId) {
-      this.sound.play("trainer_music", { loop: true, volume: 0.5 });
-    } else {
-      this.sound.play("wild_music", { loop: true, volume: 0.5 });
-    }
-
     const background = this.add.image(512, 315, "battle_background");
 
     background.setDisplaySize(1004, 605);

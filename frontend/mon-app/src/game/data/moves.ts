@@ -72,8 +72,8 @@ export const MOVES: Record<MoveId, MoveDef> = {
     type: "roche",
     power: 12,
   },
-  esquive: { id: "esquive", name: "Esquive", type: "psy", power: 10 },
-  IA: { id: "IA", name: "IA", type: "psy", power: 8 },
+  esquive: { id: "esquive", name: "Esquive", type: "psy", power: 20 },
+  IA: { id: "IA", name: "IA", type: "psy", power: 15 },
   discord: { id: "discord", name: "Discord", type: "tenebres", power: 9 },
   monster_sucre: {
     id: "monster_sucre",
