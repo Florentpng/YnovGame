@@ -41,8 +41,6 @@ export class Overworld extends Scene {
   }
 
   init() {
-    // Phaser reuses the scene instance across restarts (e.g. when returning
-    // from Battle). Reset transient state so the player can move again.
     this.isMoving = false;
   }
 
@@ -59,7 +57,6 @@ export class Overworld extends Scene {
       )
       .setStrokeStyle(2, 0xffffff);
 
-    // On parcourt la carte ligne par ligne, case par case
     for (let y = 0; y < MAP_HEIGHT; y++) {
       for (let x = 0; x < MAP_WIDTH; x++) {
         const { x: px, y: py } = tilePixelCenter(x, y);
@@ -91,7 +88,6 @@ export class Overworld extends Scene {
           const water = this.add.sprite(px, py, "water_sprite");
           water.setDisplaySize(TILE_SIZE, TILE_SIZE);
         } else {
-          // Pour toutes les autres tuiles normales (path, water, tall_grass...)
           this.add.rectangle(
             px,
             py,
@@ -181,7 +177,6 @@ export class Overworld extends Scene {
     //   return;
     // }
 
-    // 1. Détection des dresseurs adjacents
     const adj = [
       { x: x + 1, y },
       { x: x - 1, y },
@@ -201,7 +196,7 @@ export class Overworld extends Scene {
 
         this.scene.start("Battle", {
           kind: "trainer",
-          enemyTeamSpeciesIds: randomTrainerTeam, // La nouvelle équipe !
+          enemyTeamSpeciesIds: randomTrainerTeam,
           trainerId: t.id,
         });
         return;

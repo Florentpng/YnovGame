@@ -33,7 +33,7 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
       if (response.status === 200) {
         const video = document.createElement("video");
 
-        video.src = 'animation_game.mp4';
+        video.src = "animation_game.mp4";
         video.autoplay = true;
         video.muted = true;
         video.style.position = "fixed";
@@ -90,27 +90,6 @@ function Form({ isLoginMode, setIsLoginMode, setIsLoggedIn }: FormProps) {
   }
 
   return (
-    // <form onSubmit={handleSubmit}>
-    //   <h2>{isLoginMode ? "Connexion" : "Inscription"}</h2>
-    //   <input
-    //     onChange={(e) => setUsername(e.target.value)}
-    //     type="text"
-    //     name="username"
-    //     placeholder="Username"
-    //     value={username}
-    //     required
-    //   />
-    //   <input
-    //     type="password"
-    //     name="password"
-    //     onChange={(e) => setPassword(e.target.value)}
-    //     placeholder="Password"
-    //     value={password}
-    //     required
-    //   />
-    //   <button type="submit">Valider</button>
-    // </form>
-
     <div className="retro-container">
       <form onSubmit={handleSubmit} className="retro-form-box">
         <h2 className="retro-heading">
@@ -184,11 +163,21 @@ function App() {
             }}
           ></a>
         </section>
-          ) : (
-            <div id="app" style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "100vh", backgroundColor: "#000" }}>
-              <PhaserGame ref={phaserRef} currentActiveScene={() => {}} />
-            </div>
-          )}
+      ) : (
+        <div
+          id="app"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100vh",
+            backgroundColor: "#000",
+          }}
+        >
+          <PhaserGame ref={phaserRef} currentActiveScene={() => {}} />
+        </div>
+      )}
     </>
   );
 }

@@ -18,7 +18,7 @@ export type SpeciesId =
 export interface SpeciesDef {
   id: string;
   name: string;
-  imageUrl: string; // Utile pour tes composants React (ex: TeamPanel.tsx)
+  imageUrl: string;
   type: PokemonType;
   baseHp: number;
   baseAtk: number;
@@ -29,7 +29,7 @@ export const SPECIES: Record<SpeciesId, SpeciesDef> = {
   eliegateur: {
     id: "1",
     name: "Eliegateur",
-    imageUrl: "/eliegateur.png", // MODIFICATION : Chemin public direct
+    imageUrl: "/eliegateur.png",
     type: "tenebres",
     baseHp: 30,
     baseAtk: 12,
